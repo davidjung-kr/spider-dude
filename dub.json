@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"David Jung"
+	],
+	"copyright": "Copyright © 2022, David Jung",
+	"description": "Self-made net-net & value stocks screener for KRX 📈",
+	"license": "GPL-3.0",
+	"name": "spider-dude"
+}

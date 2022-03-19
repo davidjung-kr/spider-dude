@@ -1,2 +1,2 @@
 # spider-dude
-Net-net &amp; value stocks screener 📈
+Self-made net-net & value stocks screener for KRX 📈

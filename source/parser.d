@@ -17,6 +17,7 @@ import std.format;
 import std.regex;
 import std.string;
 import com.davidjung.spider.types;
+import com.davidjung.spider.report;
 
 /**
  * DART 재무데이터 파서
@@ -80,11 +81,60 @@ class Parser {
         case StatementType.IS: this.colSize = 16; break;
         default: break;
         }
-		
     }
 
+	/**
+	 * 읽기
+	 */
 	public void read(ref Report rpt) {
-		Bs[string] _bs;
+		switch(this._statementType) {
+		case StatementType.BS: readBalanceSheet(rpt); break;
+		case StatementType.IS: readIncomeSheet(rpt); break;
+		default: break;
+		}
+	}
+
+	/**
+	 * 손익계산서 로드
+	 */
+	private void readIncomeSheet(ref Report rpt) {
+		Is[string] incomeSheet;
+		File f = File(this._fileName, "r");
+		f.readln();
+		while(!f.eof()) {
+			string line = f.readln();
+			string[] cell = line.split("\t");
+			if(cell.length <= 0) continue;
+			string code = cell[1][1..7];
+
+			if(code !in incomeSheet) { // 없으면 신규 등록
+				Is newIncomeSheet;
+				newIncomeSheet.type = cell[0]; // 재무제표종류
+				newIncomeSheet.code = code; // 종목코드
+				newIncomeSheet.name = cell[2]; // 회사명
+				newIncomeSheet.market = cell[3]; // 시장구분
+				newIncomeSheet.sector = cell[4]; // 업종
+				newIncomeSheet.sectorName = cell[5]; // 업종명
+				newIncomeSheet.endMonth = cell[6]; // 결산월
+				newIncomeSheet.endDay = cell[7]; // 결산기준일
+				newIncomeSheet.report = cell[8]; // 보고서종류
+				
+				incomeSheet[newIncomeSheet.code] = newIncomeSheet;
+			}
+
+			StatementNq st = StatementNq();
+			st.currency = cell[9];         // 통화코드
+			st.ifrsCode = strip(cell[10]); // 항목코드
+			st.rowName  = strip(cell[11]); // 항목명
+			st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			incomeSheet[code].statements ~= st;
+		}
+		f.close();
+        rpt.income = incomeSheet;
+	}
+
+	private void readBalanceSheet(ref Report rpt) {
+		Bs[string] bs;
 
 		File f = File(this._fileName, "r");
 		f.readln();
@@ -96,7 +146,7 @@ class Parser {
 			
 			string code = cell[1][1..7];
 			
-			if(code !in _bs) { // 없으면 신규 등록
+			if(code !in bs) { // 없으면 신규 등록
 				Bs newBs;
 				newBs.type = cell[0]; // 재무제표종류
 				newBs.code = code; // 종목코드
@@ -108,7 +158,7 @@ class Parser {
 				newBs.endDay = cell[7]; // 결산기준일
 				newBs.report = cell[8]; // 보고서종류
 				
-				_bs[newBs.code] = newBs;
+				bs[newBs.code] = newBs;
 			}
 
 			Statement st = Statement();
@@ -116,10 +166,10 @@ class Parser {
 			st.ifrsCode = strip(cell[10]); // 항목코드
 			st.rowName = strip(cell[11]); // 항목명
 			st.setMoney(cell[12], cell[13], cell[14]);
-			_bs[code].statements ~= st;
+			bs[code].statements ~= st;
 		}
         
 		f.close();
-        rpt.balance = _bs;
+        rpt.balance = bs;
 	}
 }

@@ -2,6 +2,10 @@
 	"authors": [
 		"David Jung"
 	],
+	"dependencies": {
+		"asdf": "~>0.7.13"
+	},
+	"dflags-ldc": ["-mcpu=native"],
 	"copyright": "Copyright © 2022, David Jung",
 	"description": "Self-made net-net & value stocks screener for KRX 📈",
 	"license": "GPL-3.0",

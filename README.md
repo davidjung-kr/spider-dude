@@ -1,6 +1,10 @@
 # spider-dude
 Self-made net-net & value stocks screener for KRX 📈
 
+# Dependencies
+* [ldc-developers/ldc](https://github.com/ldc-developers/ldc) - Compiler (Recommend🌟) 
+* [libmir/asdf](https://github.com/libmir/asdf) - For JSON parsing
+
 # Example
 ```d
 Report rpt = new Report();

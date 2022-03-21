@@ -10,6 +10,7 @@ module com.davidjung.spider.formula;
  */
 
 import com.davidjung.spider.types;
+import com.davidjung.spider.report;
 
 /**
  * 공식 클래스

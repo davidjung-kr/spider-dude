@@ -14,6 +14,7 @@ import std.datetime.date;
 import std.net.curl;
 import std.string;
 import asdf;
+import com.davidjung.spider.report;
 import com.davidjung.spider.types;
 
 /** 
@@ -42,6 +43,16 @@ class Downloader {
         ]);
         string jsonText = content.to!string;
         return jsonText.deserialize!KrxCapRes;
+    }
+
+    /**
+     * 한국거래소 전종목 시세 정보 적재
+     * Params:
+     *  date = 조회기준일
+     *  rpt = 보고서
+     */
+    void readKrxCapAllByBlock(Date date, ref Report rpt) {
+        rpt.blocks = getKrxCapAllByBlock(date);
     }
 
     /**
@@ -129,6 +140,11 @@ struct OutBlock {
     @serdeKeys("TDD_LWPRC") string tddLwprc;
     /// 시가 [Numberic String]
     @serdeKeys("TDD_OPNPRC") string tddOpnprc;
+
+    /// 시가총액
+    @property ulong marketCap() {
+        return this.mktCap.replace(",", "").to!ulong;
+    }
 
     /// 종가
     @property uint closePrice() {

@@ -36,10 +36,14 @@ enum StatementType {
 
 /// IFRS 코드
 enum IfrsCode {
-    /// ifrs-full_CurrentAssets:유동자산
+    //// ifrs-full_CurrentAssets:유동자산
     FULL_CURRENTASSETS,
-    // ifrs-full_Liabilities:부채총계
-    FULL_LIABILITIES
+    /// ifrs-full_Liabilities:부채총계
+    FULL_LIABILITIES,
+
+
+    /// ifrs-full_ProfitLoss:당기순이익
+    FULL_PROFITLOSS
 }
 
 /// N분기
@@ -85,7 +89,8 @@ struct GetCodeFrom {
 	public static string ifrsCode(IfrsCode e) @safe {
         switch(e) {
         case IfrsCode.FULL_CURRENTASSETS: return "ifrs-full_CurrentAssets";
-        case IfrsCode.FULL_LIABILITIES: return "ifrs-full_Liabilities";
+        case IfrsCode.FULL_LIABILITIES:   return "ifrs-full_Liabilities";
+        case IfrsCode.FULL_PROFITLOSS:    return "ifrs-full_ProfitLoss";
         default: return "";
         }   
     }
@@ -107,16 +112,6 @@ struct GetCodeFrom {
         }
     }
 
-}
-
-/// 보고서 (재무상태표, 손익계산서, 포괄손익계산서 포함)
-class Report {
-	/// 재무상태표
-	private Bs[string] _balance;
-	/// 재무상태표(Getter)
-	@property Bs[string] balance() { return _balance; }
-	/// 재무상태표(Setter)
-	@property void balance(Bs[string] bs) { this._balance = bs; }
 }
 
 /// 재무상태표
@@ -163,10 +158,10 @@ struct Bs {
 		return s;
 	}
 
-	// 계정항목들
+	/// 계정항목들
 	Statement[] statements;
 
-	// 재무제표 쿼리
+	/// 재무제표 질의
 	long q(IfrsCode ifrsCode) {
 		for(int i=0; i<this.statements.length; i++) {
 			if(this.statements[i].ifrsCode == GetCodeFrom.ifrsCode(ifrsCode)) {
@@ -177,7 +172,7 @@ struct Bs {
 	}
 }
 
-// 계정항목
+/// 계정항목
 struct Statement {
 	// [0] 통화
 	string currency;
@@ -199,6 +194,105 @@ struct Statement {
 		this.now = (e1 == "") ? 0:to!long(e1);
 		this.y1 =  (e2 == "") ? 0:to!long(e2);
 		this.y2 =  (e3 == "") ? 0:to!long(e3);
+	}
+}
+
+/// 손익계산서 계정항목
+struct StatementNq {
+    /// [0] 통화
+    string currency;
+    /// [1] 항목코드
+    string ifrsCode;
+    /// [2] 항목명
+    string rowName;
+    /// [3] 당기 3분기 3개월
+    long now = 0;
+    /// [4] 당기 3분기 누적
+    long nowAcc = 0;
+    /// [5] 전기 3분기 3개월
+    long y1 = 0;
+    /// [6] 전기 3분기 누적
+    long y1Acc = 0;
+    /// [7] 전기
+    long y2 = 0;
+    /// [8] 전전기
+    long y2Acc = 0;
+
+	void setMoney(string now, string nowAcc, string y1, string y1Acc, string y2, string y2Acc) {
+		string n = strip(now).replace(",", "");
+        string na = strip(nowAcc).replace(",", "");
+        this.now    = (n == "")  ? 0:to!long(n);
+        this.nowAcc = (na == "") ? 0:to!long(na);
+
+        y1         = strip(y1).replace(",", "");
+        string y1a = strip(y1Acc).replace(",", "");
+        this.y1    = (y1 == "")  ? 0:to!long(y1);
+        this.y1Acc = (y1a == "") ? 0:to!long(y1a);
+
+        y2         = strip(y2)   .replace(",", "");
+        string y2a = strip(y2Acc).replace(",", "");
+        this.y2    = (y2 == "")  ? 0:to!long(y2);
+        this.y2Acc = (y2a == "") ? 0:to!long(y2a);
+
+	}
+}
+
+
+/// 손익계산서
+struct Is {
+	// [0] 재무제표종류
+	string type;
+	// [1] 종목코드
+	string code;
+	// [2] 회사명
+	string name;
+	// [3] 시장구분
+	string market;
+	// [4] 업종
+	string sector;
+	// [5] 업종명
+	string sectorName;
+	// [6] 결산월
+	string endMonth;
+	// [7] 결산기준일
+	string endDay;
+	// [8] 보고서종류
+	string report;
+
+	string pprint() {
+		string s;
+		// [0] 재무제표종류
+		s ~= "type:"~type~",\n";
+		// [1] 종목코드
+		s ~= "code:"~code~",\n";
+		// [2] 회사명
+		s ~= "name:"~name~",\n";
+		// [3] 시장구분
+		s ~= "market:"~market~",\n";
+		// [4] 업종
+		s ~= "sector:"~sector~",\n";
+		// [5] 업종명
+		s ~= "sectorName:"~sectorName~",\n";
+		// [6] 결산월
+		s ~= "endMonth:"~endMonth~",\n";
+		// [7] 결산기준일
+		s ~= "endDay:"~endDay~",\n";
+		// [8] 보고서종류
+		s ~= "report:"~report;
+		return s;
+	}
+
+	/// 계정항목들
+	StatementNq[] statements;
+
+	/// 재무제표 질의
+	long q(IfrsCode ifrsCode) {
+		for(int i=0; i<this.statements.length; i++) {
+			if(this.statements[i].ifrsCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+				return this.statements[i].now;
+			}
+		}
+		return 0;
 	}
 }
 

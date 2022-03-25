@@ -17,7 +17,10 @@ import com.davidjung.spider.report;
  */
 class Formula {
     private Report report;
-    this(Report report) {
+    /**
+     * 생성자
+     */
+    this(ref Report report) {
         this.report = report;
     }
 
@@ -74,5 +77,14 @@ class Formula {
         if(netCurrentassets > 0)
             return netCurrentassets;
         return -1;
+    }
+
+    // PBR 계산
+    private ulong calcPbr(Bs b) {
+        long cap = b.getMarketCap();
+        long fullAssets = b.q(IfrsCode.FULL_ASSETS);
+        if(cap==0 || fullAssets==0)
+            return -1;
+        return cap/fullAssets;
     }
 }

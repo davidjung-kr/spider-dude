@@ -40,7 +40,8 @@ enum IfrsCode {
     FULL_CURRENTASSETS,
     /// ifrs-full_Liabilities:부채총계
     FULL_LIABILITIES,
-
+	/// ifrs-full_Assets:자산총계
+	FULL_ASSETS,
 
     /// ifrs-full_ProfitLoss:당기순이익
     FULL_PROFITLOSS

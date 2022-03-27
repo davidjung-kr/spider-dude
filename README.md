@@ -6,30 +6,32 @@ Self-made net-net & value stocks screener for KRX 📈
 * [libmir/asdf](https://github.com/libmir/asdf) - For JSON parsing
 
 # Example
-```d
-Report rpt = new Report();
+```.d
+// 내 보고서
+Report myReport = new Report();
 
-// 한국거래소 2022년 3월 21일 기준 전종목 시세와 시가총액 등
+// 1. 거래소 데이터 적재 (2022년 3월 21일 기준)
 Downloader krxClient = new Downloader();
-krxClient.readKrxCapAllByBlock(Date(2022,03,21), rpt);
-    
-// File name: 2021_3Q_OFS_IS_20220215.txt → 2021년 3분기 연결 재무제표
-Parser bsOfs = new Parser("2021", Period.Y3, ReportType.OFS, StatementType.BS);
-bsOfs.read(rpt);
+krxClient.readKrxCapAllByBlock(Date(2022, 03, 21), myReport);
 
-// NCAV 공식적용
-Formula netNetStocks = new Formula(rpt);
+// 2. 재무상태표를 내 보고서에 적재 (2021_3Q_OFS_BS_20220215.txt → 2021년 3분기 연결 재무제표)
+Parser bsOfs2021Y3 = new Parser("2021", Period.Y3, ReportType.OFS, StatementType.BS);
+bsOfs2021Y3.read(myReport);
 
-// NCAV 결과 취득
-File fs = File("my_ncav_stock_list.txt", "w");
-fs.writeln("CorpCode\tNCAV");
-foreach(ncav; netNetStocks.query([FormulaName.NCAV])["NCAV"]) {
-    if(ncav.value > 0) {
-        fs.write(ncav.code);
-        fs.write("\t");
-        fs.writeln(ncav.value);
-    }
+// 3. 손익계산서를 내 보고서에 적재 (2021_3Q_OFS_IS_20220215.txt → 2021년 3분기 연결 손익계산서)
+Parser isOfs2021Y3 = new Parser("2021", Period.Y3, ReportType.OFS, StatementType.IS);
+isOfs2021Y3.read(myReport);
+
+// 4. 비정상 종목 필터링
+//	- 비상장 종목, 상장폐지 종목, 중국회사 제거
+myReport.filteringOnlyListed();
+myReport.filteringNotCapZero();
+myReport.filteringNotChineseCompany();
+
+// 5. 원하는 밸류에이션 지표 적용
+Formula pbrFilter = new Formula(myReport);
+foreach(stock; pbrFilter.query([FormulaName.PBR])["PBR"]) {
+    writef("[%s] %f\n", stock.code, stock.value);
 }
-fs.close();
 ```
 Easy squeezy lemon peasy 🍋

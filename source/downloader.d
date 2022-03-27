@@ -9,10 +9,12 @@ module com.davidjung.spider.downloader;
  * License: GPL-3.0
  */
 
+import std.stdio:File;
 import std.conv:to;
 import std.datetime.date;
 import std.net.curl;
 import std.string;
+import std.algorithm;
 import asdf;
 import com.davidjung.spider.report;
 import com.davidjung.spider.types;
@@ -27,6 +29,9 @@ import com.davidjung.spider.types;
 class Downloader {
     /**
      * 한국거래소 전종목 시세 정보 취득
+     *
+     * 한국거래소의 전종목 시세, 시가총액, 종가 등을 가져옵니다.
+     *
      * Params:
      *  date = 조회기준일
      * Returns: 전종목 시세정보 [KrxCapRes]
@@ -47,6 +52,7 @@ class Downloader {
 
     /**
      * 한국거래소 전종목 시세 정보 적재
+     *
      * Params:
      *  date = 조회기준일
      *  rpt = 보고서
@@ -57,6 +63,7 @@ class Downloader {
 
     /**
      * 한국거래소 전종목 시세 정보 취득
+     *
      * Params:
      *  date = 조회기준일
      * Returns: 종목코드 기준 시세정보 [OutBlock[string]]
@@ -68,6 +75,26 @@ class Downloader {
             result[b.isuSrtCd] = b;
         }
         return result;
+    }
+
+    /**
+     * 한국거래소 전종목 시세 정보 저장
+     *
+     * 한국거래소 전종목 시세 정보를 파일로 저장 합니다.
+     * 파일명은 `KRX_<입력받은_조회년월일>.dump` 입니다.
+     * Params:
+     *  date = 조회기준일
+     * Returns: 조회된 종목 개수
+     */
+    ulong fetchKrxCapAll(Date date) {
+        KrxCapRes res = getKrxCapAll(date);
+        File f = File("KRX_"~date.toISOString()~".dump", "w");
+        f.writeln(res.currentDatetime);
+        foreach(block; res.blocks) {
+            f.writeln(block);
+        }
+        f.close();
+        return res.blocks.length;
     }
 }
 
@@ -103,7 +130,9 @@ struct DartUrl {
 
 /// 전종목시세 요청결과
 struct KrxCapRes {
+    /// 조회날짜
     @serdeKeys("CURRENT_DATETIME") string currentDatetime;
+    /// 종목별 거래정보
     @serdeKeys("OutBlock_1") OutBlock[] blocks;
 }
 
@@ -143,17 +172,58 @@ struct OutBlock {
 
     /// 시가총액
     @property ulong marketCap() {
-        return this.mktCap.replace(",", "").to!ulong;
+        return numbericToUlong(this.mktCap);
+    }
+
+    /// 고가
+    @property uint highPrice() {
+        return numbericToUint(this.tddHgprc);
+    }
+
+    /// 저가
+    @property uint lowPrice() {
+        return numbericToUint(this.tddLwprc);
+    }
+
+    /// 시가
+    @property uint openPrice() {
+        return numbericToUint(this.tddOpnprc);
     }
 
     /// 종가
     @property uint closePrice() {
-        return this.tddClsprc.replace(",", "").to!uint;
+        return numbericToUint(this.tddClsprc);
     }
 
-    /// 유통주식수
+    /// 유통주식수 = 상장 주식 수
     @property ulong listShared() {
-        return this.listShrs.replace(",", "").to!long;
+        return numbericToUlong(this.listShrs);
+    }
+
+    /**
+     * 숫자데이터 클랜징
+     *
+     * 0~9까지의 숫자만 차례대로 담어 문자열로 리턴 합니다.
+     * 만약 파라메터 문자열에 숫자가 없을 경우 0으로 리턴 합니다.
+     *
+     * Params:
+     *  numberic = 숫자가 포함된 어떤 문자열
+     * Return: 0~9만 걸러내진 문자열
+     */
+    private string cleansingForNumeric(string numberic) {
+        // string to char[] and filtering... ASCII로 변환해 0~9만 획득
+        string result = numberic.dup.filter!(x => cast(int)x >= 48 && cast(int)x <= 57).to!string; 
+        return result.length <= 0 ? "0":result;
+    }
+
+    /// 문자열을 숫자로
+    private ulong numbericToUlong(string numberic) {
+        return cleansingForNumeric(numberic).to!ulong;
+    }
+
+    /// 문자열을 숫자로
+    private uint numbericToUint(string numberic) {
+        return cleansingForNumeric(numberic).to!uint;
     }
 }
 
@@ -172,4 +242,13 @@ unittest {
     OutBlock[string] capInfoByBlocks = client.getKrxCapAllByBlock(dt);
     assert(capInfoByBlocks[kbFinanceCode].name == "KB금융");
     assert(capInfoByBlocks[kbFinanceCode].closePrice == 57_400); // KB금융 종가: KRW 57,400
+
+    ulong stockCount = client.fetchKrxCapAll(dt);
+    assert(stockCount > 0);
+
+    OutBlock funcTestBlock = OutBlock();
+    string dirtyString = "AX#0(,Q@(*XNCNVDI#(";
+    assert("0" == funcTestBlock.cleansingForNumeric(dirtyString));
+    assert(0 == funcTestBlock.numbericToUlong(dirtyString));
+    assert(0 == funcTestBlock.numbericToUint(dirtyString));
 }

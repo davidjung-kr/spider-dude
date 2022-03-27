@@ -11,6 +11,7 @@ module com.davidjung.spider.types;
 
 import std.conv;
 import std.string;
+import std.math.rounding;
 
 /// 연결/개별 여부
 enum ReportType {
@@ -36,15 +37,23 @@ enum StatementType {
 
 /// IFRS 코드
 enum IfrsCode {
-    //// ifrs-full_CurrentAssets:유동자산
-    FULL_CURRENTASSETS,
-    /// ifrs-full_Liabilities:부채총계
-    FULL_LIABILITIES,
-	/// ifrs-full_Assets:자산총계
+	/// `ifrs-full_Assets`: 총자산
 	FULL_ASSETS,
+    /// `ifrs-full_CurrentAssets`: 유동자산
+    FULL_CURRENTASSETS,
+    /// `ifrs-full_Liabilities`: 부채총계
+    FULL_LIABILITIES,
+	/// `ifrs-full_equity`: 자본총계
+	FULL_EQUITY,
 
-    /// ifrs-full_ProfitLoss:당기순이익
+    /// `ifrs-full_ProfitLoss`: 당기순이익
     FULL_PROFITLOSS
+}
+
+/// DART 코드
+enum DartCode {
+	/// `dart_DepreciationExpense`:감가상각비
+	DEPRECIATION_EXPENSE
 }
 
 /// N분기
@@ -61,8 +70,13 @@ enum Period {
 
 /// 공식명
 enum FormulaName {
-    /// Net-net current value
+    /// Net-net current value (NCAV)
     NCAV,
+	/// Price to Book-value Ratio (주가순자산비율)
+	PBR,
+	/// Enterprise value / Earnings Before Interest, Taxes, Depreciation and Amortization
+	EV_EBITA, 
+	/// None 존재하지 않음
     NONE
 }
 
@@ -75,8 +89,8 @@ struct GetCodeFrom {
         case StatementType.CIS: return "CIS";
         case StatementType.CF: return "CF";
         case StatementType.SCE: return "SCE";
-        default: return "";
-        }   
+        default: throw new Exception("Wrong code - ["~e.to!string~"]");
+        }
     }
 
 	public static string reportType(ReportType e) @safe {
@@ -84,16 +98,27 @@ struct GetCodeFrom {
         case ReportType.OFS: return "OFS"; // 개별 보고서
         case ReportType.CFS: return "CFS"; // 연결 보고서
         default: return "";
-        }   
+        }
     }
 
+	/// IfrsCode Enum을 String으로
 	public static string ifrsCode(IfrsCode e) @safe {
         switch(e) {
+		case IfrsCode.FULL_ASSETS:        return "ifrs-full_Assets";
         case IfrsCode.FULL_CURRENTASSETS: return "ifrs-full_CurrentAssets";
         case IfrsCode.FULL_LIABILITIES:   return "ifrs-full_Liabilities";
         case IfrsCode.FULL_PROFITLOSS:    return "ifrs-full_ProfitLoss";
+		case IfrsCode.FULL_EQUITY:        return "ifrs-full_Equity";
         default: return "";
-        }   
+        }
+    }
+
+	/// DartCode Enum을 String으로
+	public static string dartCode(DartCode e) @safe {
+        switch(e) {
+		case DartCode.DEPRECIATION_EXPENSE: return "dart_DepreciationExpense";
+        default: return "";
+        }
     }
 
     public static string period(Period e) @safe {
@@ -103,12 +128,13 @@ struct GetCodeFrom {
         case Period.Y3: return "3Q";
         case Period.Y4: return "4Q";
         default: return "";
-        }   
+        }
     }
 
     public static string formulaName (FormulaName e) {
         switch(e){
         case FormulaName.NCAV: return "NCAV";
+		case FormulaName.PBR: return "PBR";
         default: return "NONE";
         }
     }
@@ -117,23 +143,23 @@ struct GetCodeFrom {
 
 /// 재무상태표
 struct Bs {
-	// [0] 재무제표종류
+	/// [0] 재무제표종류
 	string type;
-	// [1] 종목코드
+	/// [1] 종목코드
 	string code;
-	// [2] 회사명
+	/// [2] 회사명
 	string name;
-	// [3] 시장구분
+	/// [3] 시장구분
 	string market;
-	// [4] 업종
+	/// [4] 업종
 	string sector;
-	// [5] 업종명
+	/// [5] 업종명
 	string sectorName;
-	// [6] 결산월
+	/// [6] 결산월
 	string endMonth;
-	// [7] 결산기준일
+	/// [7] 결산기준일
 	string endDay;
-	// [8] 보고서종류
+	/// [8] 보고서종류
 	string report;
 
 	string pprint() {
@@ -170,6 +196,12 @@ struct Bs {
 			}
 		}
 		return 0;
+	}
+
+	public bool empty() {
+		if(statements.length <= 0)
+			return true;
+		return false;
 	}
 }
 
@@ -306,12 +338,12 @@ struct FormulaResult {
     /// 종목코드(Getter)
     @property string code() { return _code; }
     /// 결과 값
-    private long _value;
+    private double _value;
     /// 결과 값(Getter)
-    @property long value() { return _value; }
+    @property double value() { return _value; }
     
     /// 생성자
-    this(string code, long value) {
+    this(string code, double value) {
         this._code = code;
         this._value = value;
     }

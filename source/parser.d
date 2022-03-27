@@ -10,6 +10,7 @@ module com.davidjung.spider.parser;
  */
 
 import std.stdio;
+import std.regex;
 import std.conv;
 import std.path;
 import std.file;
@@ -21,6 +22,7 @@ import com.davidjung.spider.report;
 
 /**
  * DART 재무데이터 파서
+ *
  * Check out: https://opendart.fss.or.kr/disclosureinfo/fnltt/dwld/main.do
  */
 class Parser {
@@ -172,4 +174,34 @@ class Parser {
 		f.close();
         rpt.balance = bs;
 	}
+
+	/**
+	 * 항목코드 정규화
+	 * 
+	 * entity00128661_udf_IS_2021111016569448 .. 와 같이
+	 * 공식적인 IFRS 항목코드가 아닌 항목명에서 불필요한 데이터를 지우고
+	 * `udf-`를 붙여 리턴한다.
+	 * 클랜징할 대상이 없을 경우 입력 값 그대로 리턴.
+	 *
+	 * Examples: 
+	 *	assert("udf-IncomeStatementAbstract" ==
+	 *         Parser.cleaningAccountingCode(
+	 *	"entity00128661_udf_IS_2021111016569448_IncomeStatementAbstract"));
+	 * 
+	 */
+	private static string cleaningAccountingCode(string blaha) {
+		if(blaha.indexOf("entity") < 0) {
+			return blaha;
+		}
+		auto matchResult = matchFirst(blaha, ctRegex!(`entity\d+_udf_[BIS]+_\d+_(\w+)`));
+		if(matchResult.empty)
+			return blaha;
+		return "udf-"~matchResult[1]; // 0은 Full-match, 1부터 group
+	}
+	
+}
+
+unittest {
+	assert("udf-IncomeStatementAbstract" == Parser.cleaningAccountingCode(
+			"entity00128661_udf_IS_2021111016569448_IncomeStatementAbstract")); // == 지분법이익
 }

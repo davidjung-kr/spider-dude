@@ -5,6 +5,18 @@ Self-made net-net & value stocks screener for KRX 📈
 * [ldc-developers/ldc](https://github.com/ldc-developers/ldc) - Compiler (Recommend🌟) 
 * [libmir/asdf](https://github.com/libmir/asdf) - For JSON parsing
 
+# Features
+## Loading Data
+1. [Balance sheet from FSS (DART 재무정보 파일 적재)](https://opendart.fss.or.kr/)
+2. [Market cap, shares and prices from KRX (한국거래소 실시간 시제 적재)](http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101)
+## Formula
+* [x] NCAV
+* [x] PBR
+* [x] PER
+* [ ] PSR
+* [ ] ROE
+* [ ] EV/EBITA
+ 
 # Example
 ```.d
 // 내 보고서

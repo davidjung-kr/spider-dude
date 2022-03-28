@@ -9,6 +9,7 @@ module com.davidjung.spider.report;
  * License: GPL-3.0
  */
 
+import std.algorithm;
 import com.davidjung.spider.types;
 import com.davidjung.spider.downloader;
 
@@ -95,6 +96,40 @@ class Report {
             }
         }
         _balance = tempBs;
+        blocks = tempBlocks;
+        return count;
+    }
+
+    /**
+     * 종목코드 교집합 처리
+     *
+     * 재무제표, 한국거래소에 존재하는 종목코드 교집합만 남기고
+     * 다른 데이터는 모두 지웁니다.
+     * 인스턴스의 멤버필드(재무제표, 거래소 데이터 등)에 영향을 미칩니다.
+     * Returns: 제거한 후 남은 종목 수
+     */
+    public int filteringIntersectionCorpCode() {
+        string[] krxCorpCodes = blocks.keys;
+        string[] isCorpCodes = _income.keys;
+        string[] bsCorpCodes = _balance.keys;
+
+        Bs[string] tempBs;
+        Is[string] tempIs;
+        OutBlock[string] tempBlocks;
+        uint count = 0;
+        foreach(string code; krxCorpCodes) {
+            if(countUntil(bsCorpCodes, code) < 0 ||
+                countUntil(isCorpCodes, code) < 0)
+                continue;
+
+            tempBs[code] = _balance[code];
+            tempIs[code] = _income[code];
+            tempBlocks[code] = blocks[code];
+            count++;
+        }
+
+        _balance = tempBs;
+        _income = tempIs;
         blocks = tempBlocks;
         return count;
     }

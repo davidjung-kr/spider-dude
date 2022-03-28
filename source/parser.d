@@ -126,7 +126,7 @@ class Parser {
 
 			StatementNq st = StatementNq();
 			st.currency = cell[9];         // 통화코드
-			st.ifrsCode = strip(cell[10]); // 항목코드
+			st.statementCode = strip(cell[10]); // 항목코드
 			st.rowName  = strip(cell[11]); // 항목명
 			st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
 			incomeSheet[code].statements ~= st;
@@ -165,7 +165,7 @@ class Parser {
 
 			Statement st = Statement();
 			st.currency = cell[9]; // 통화코드
-			st.ifrsCode = strip(cell[10]); // 항목코드
+			st.statementCode = strip(cell[10]); // 항목코드
 			st.rowName = strip(cell[11]); // 항목명
 			st.setMoney(cell[12], cell[13], cell[14]);
 			bs[code].statements ~= st;

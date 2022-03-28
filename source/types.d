@@ -53,7 +53,11 @@ enum IfrsCode {
 /// DART 코드
 enum DartCode {
 	/// `dart_DepreciationExpense`:감가상각비
-	DEPRECIATION_EXPENSE
+	DEPRECIATION_EXPENSE,
+	/// `dart_OperatingIncomeLoss`:영업이익
+	OPERATING_INCOME_LOSS,
+	/// `dart_AmortisationExpense`:무형자산상각비
+	AMORTISATION_EXPENSE
 }
 
 /// N분기
@@ -75,7 +79,9 @@ enum FormulaName {
 	/// Price to Book-value Ratio (주가순자산비율)
 	PBR,
 	/// Enterprise value / Earnings Before Interest, Taxes, Depreciation and Amortization
-	EV_EBITA, 
+	EV_EBITA,
+	/// Price-earning ratio (주가수익비율)
+	PER,
 	/// None 존재하지 않음
     NONE
 }
@@ -116,7 +122,9 @@ struct GetCodeFrom {
 	/// DartCode Enum을 String으로
 	public static string dartCode(DartCode e) @safe {
         switch(e) {
-		case DartCode.DEPRECIATION_EXPENSE: return "dart_DepreciationExpense";
+		case DartCode.DEPRECIATION_EXPENSE:  return "dart_DepreciationExpense";
+		case DartCode.OPERATING_INCOME_LOSS: return "dart_OperatingIncomeLoss";
+		case DartCode.AMORTISATION_EXPENSE:  return "dart_AmortisationExpense";
         default: return "";
         }
     }
@@ -134,7 +142,9 @@ struct GetCodeFrom {
     public static string formulaName (FormulaName e) {
         switch(e){
         case FormulaName.NCAV: return "NCAV";
-		case FormulaName.PBR: return "PBR";
+		case FormulaName.PBR:  return "PBR";
+		case FormulaName.PER:  return "PER";
+		case FormulaName.EV_EBITA: return "EV/EBITA";
         default: return "NONE";
         }
     }
@@ -191,13 +201,16 @@ struct Bs {
 	/// 재무제표 질의
 	long q(IfrsCode ifrsCode) {
 		for(int i=0; i<this.statements.length; i++) {
-			if(this.statements[i].ifrsCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+			if(this.statements[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
 				return this.statements[i].now;
 			}
 		}
 		return 0;
 	}
 
+	/**
+	 * 계정과목 비어있는 지 확인
+	 */
 	public bool empty() {
 		if(statements.length <= 0)
 			return true;
@@ -210,7 +223,7 @@ struct Statement {
 	// [0] 통화
 	string currency;
 	// [1] 항목코드
-	string ifrsCode;
+	string statementCode;
 	// [2] 항목명
 	string rowName;
 	// [3] 당기
@@ -235,7 +248,7 @@ struct StatementNq {
     /// [0] 통화
     string currency;
     /// [1] 항목코드
-    string ifrsCode;
+    string statementCode;
     /// [2] 항목명
     string rowName;
     /// [3] 당기 3분기 3개월
@@ -321,11 +334,32 @@ struct Is {
 	/// 재무제표 질의
 	long q(IfrsCode ifrsCode) {
 		for(int i=0; i<this.statements.length; i++) {
-			if(this.statements[i].ifrsCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+			if(this.statements[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
 				return this.statements[i].now;
 			}
 		}
 		return 0;
+	}
+
+	/**
+	 * 다트 계정과목 조회
+	 */
+	long queryDartStatement(DartCode dartCode) {
+		for(int i=0; i<this.statements.length; i++) {
+			if(this.statements[i].statementCode == GetCodeFrom.dartCode(dartCode)) {
+				return this.statements[i].now;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * 계정과목 비어있는 지 확인
+	 */
+	public bool empty() {
+		if(statements.length <= 0)
+			return true;
+		return false;
 	}
 }
 
@@ -338,13 +372,35 @@ struct FormulaResult {
     /// 종목코드(Getter)
     @property string code() { return _code; }
     /// 결과 값
-    private double _value;
+    private long _value;
     /// 결과 값(Getter)
-    @property double value() { return _value; }
-    
-    /// 생성자
-    this(string code, double value) {
-        this._code = code;
-        this._value = value;
-    }
+    @property long value() { return _value; }
+    /// 결과 값(Setter)
+    @property void value(long v) { this._value = v; }
+    /// 비율 값
+    private float _ratio;
+    /// 비율 값(Getter)
+    @property float ratio() { return _ratio; }
+    /// 비율 값(Setter)
+    @property void ratio(float v) { this._ratio = v; }
+
+	/** 
+	 * 생성자
+	 * Params:
+	 *	code = 종목코드
+	 */
+	this(string code) {
+		this._code = code;
+	}
+
+	/**
+	 * 비어있는 지 여부
+	 */
+	@property bool empty() {
+		return (_value==0 && _ratio ==0);
+	}
+
+	@property bool notEmpty() {
+		return !this.empty();
+	}
 }

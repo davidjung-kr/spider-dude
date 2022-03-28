@@ -55,14 +55,16 @@ class Formula {
             foreach(formulaEnum; formulaNames) {
                 string key = GetCodeFrom.formulaName(formulaEnum);
                 string code = b.code;
+                FormulaResult r = FormulaResult(code);
                 switch(formulaEnum){
-                case FormulaName.NCAV:
-                    result[key] ~= FormulaResult(code, calcNcav(code));
-                    break;
-                case FormulaName.PBR:
-                    result[key] ~= FormulaResult(code, calcPbr(code));
-                    break;
+                case FormulaName.NCAV: r.value = calcNcav(code); break;
+                case FormulaName.PBR:  r.ratio = calcPbr(code); break;
+                case FormulaName.PER:  r.ratio = calcPer(code); break;
+                case FormulaName.EV_EBITA: r.ratio = calcEvEbita(code); break;
                 default: continue;
+                }
+                if(r.notEmpty) {
+                    result[key] ~= r;
                 }
             }
         }
@@ -78,8 +80,9 @@ class Formula {
     public FormulaResult[] ncav() {
         FormulaResult[] result;
         foreach(b; report.balance) {
-            string code = b.code;
-            result ~= FormulaResult(code, calcNcav(code));
+            FormulaResult r = FormulaResult(b.code);
+            r.value = calcNcav(b.code);
+            result ~= r;
         }
         return result;
     }
@@ -93,8 +96,25 @@ class Formula {
     public FormulaResult[] pbr() {
         FormulaResult[] result;
         foreach(b; report.balance) {
-            string code = b.code;
-            result ~= FormulaResult(code, calcPbr(code));
+            FormulaResult r = FormulaResult(b.code);
+            r.ratio = calcPbr(b.code);
+            result ~= r;
+        }
+        return result;
+    }
+
+    /**
+     * PER 취득
+     * 
+     * calcPer을 래핑한 메소드 입니다.
+     * See_Also: this.calcPer
+     */
+    public FormulaResult[] per() {
+        FormulaResult[] result;
+        foreach(b; report.balance) {
+            FormulaResult r = FormulaResult(b.code);
+            r.ratio = calcPer(b.code);
+            result ~= r;
         }
         return result;
     }
@@ -113,9 +133,8 @@ class Formula {
         long fullCurrentassets = balance.q(IfrsCode.FULL_CURRENTASSETS);
         long fullLiabilities = balance.q(IfrsCode.FULL_LIABILITIES);
         long netCurrentassets = fullCurrentassets - fullLiabilities;
-        if(netCurrentassets > 0)
-            return netCurrentassets;
-        return -1;
+
+        return netCurrentassets;
     }
 
     /**
@@ -141,6 +160,25 @@ class Formula {
     }
 
     /**
+     * PER 계산
+     * 
+     * Params:
+     *  code = 종목코드
+     */
+    private float calcPer(string code) {
+        Is income = report.getIncomeStatement(code);
+        if(income.empty)
+            return -1;
+        double marketCap = report.getMarketCap(code).to!double;
+        double fullProfitloss = income.q(IfrsCode.FULL_PROFITLOSS).to!double;
+
+       if(marketCap==0 || fullProfitloss==0)
+            return -1;
+
+        return marketCap/fullProfitloss;
+    }
+
+    /**
      * EV/EBITA 계산
      * 
      * EV는 시가총액과 순차입금 더한 값을 계산하고,
@@ -151,17 +189,23 @@ class Formula {
      */
     private float calcEvEbita(string code) {
         Bs balance = report.getBalanceStatement(code);
-        if(balance.empty)
+        Is income = report.getIncomeStatement(code);
+        if(balance.empty || income.empty)
             return -1;
         ulong marketCap = report.getMarketCap(code);
         ulong fullLiabilities = balance.q(IfrsCode.FULL_LIABILITIES);
         ulong fullCurrentassets = balance.q(IfrsCode.FULL_CURRENTASSETS);
+    
+        ulong incomeLoss = income.queryDartStatement(DartCode.OPERATING_INCOME_LOSS);
+        ulong expense = income.queryDartStatement(DartCode.DEPRECIATION_EXPENSE) +
+            income.queryDartStatement(DartCode.AMORTISATION_EXPENSE);
 
-       if(marketCap==0 || fullLiabilities==0 || fullCurrentassets==0)
+       if(marketCap==0 || fullLiabilities==0 || fullCurrentassets==0 || incomeLoss==0 || expense==0)
             return -1;
 
-        ulong enterpriseValue = marketCap + (fullLiabilities-fullCurrentassets); // ev
+        long ev = marketCap + (fullLiabilities-fullCurrentassets); // 우량주 포함 필요
+        long ebita = incomeLoss+expense;
 
-        return enterpriseValue;
+        return ev/ebita;
     }
 }

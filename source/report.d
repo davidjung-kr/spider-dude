@@ -21,12 +21,20 @@ class Report {
 	@property Bs[string] balance() { return _balance; }
 	/// 재무상태표(Setter)
 	@property void balance(Bs[string] bs) { this._balance = bs; }
+    
+    /// 포괄손익계산서
+    private Cis[string] _cIncome;
+    /// 포괄손익계산서(Getter)
+	@property Cis[string] comprehensiveIncome() { return _cIncome; }
+	/// 포괄손익계산서(Setter)
+	@property void comprehensiveIncome(Cis[string] cis) { this._cIncome = cis; }
+
     /// 손익계산서
-    public Is[string] _income;
+    private Is[string] _income;
     /// 손익계산서(Getter)
 	@property Is[string] income() { return _income; }
 	/// 손익계산서(Setter)
-	@property void income(Is[string] _is) { this._income = _is; }
+	@property void income(Is[string] income) { this._income = income; }
 
     /// 전종목시세정보 정보
     public OutBlock[string] blocks;
@@ -110,8 +118,11 @@ class Report {
      */
     public int filteringIntersectionCorpCode() {
         string[] krxCorpCodes = blocks.keys;
-        string[] isCorpCodes = _income.keys;
         string[] bsCorpCodes = _balance.keys;
+        string[] isCorpCodes;
+        if(_cIncome == null)
+            isCorpCodes = _income.keys;
+        else isCorpCodes = _cIncome.keys;
 
         Bs[string] tempBs;
         Is[string] tempIs;
@@ -123,7 +134,10 @@ class Report {
                 continue;
 
             tempBs[code] = _balance[code];
-            tempIs[code] = _income[code];
+            if(_cIncome == null)
+                tempIs[code] = _income[code];
+            else
+                tempIs[code] = _cIncome[code];
             tempBlocks[code] = blocks[code];
             count++;
         }
@@ -137,6 +151,11 @@ class Report {
     /// 재무상태표
     public Bs getBalanceStatement(string code) {
         return _balance[code];
+    }
+
+    /// 포괄손익계산서
+    public Cis getComprehensiveIncomeStatement(string code) {
+        return _cIncome[code];
     }
 
     /// 손익계산서

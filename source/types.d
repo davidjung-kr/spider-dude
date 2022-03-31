@@ -218,71 +218,8 @@ struct Bs {
 	}
 }
 
-/// 계정항목
-struct Statement {
-	// [0] 통화
-	string currency;
-	// [1] 항목코드
-	string statementCode;
-	// [2] 항목명
-	string rowName;
-	// [3] 당기
-	long now = 0;
-	// [4] 전기
-	long y1 = 0;
-	// [5] 전전기
-	long y2 = 0;
-
-	void setMoney(string now, string y1, string y2) {
-		string e1 = strip(now).replace(",", "");
-		string e2 = strip(y1).replace(",", "");
-		string e3 = strip(y2).replace(",", "");
-		this.now = (e1 == "") ? 0:to!long(e1);
-		this.y1 =  (e2 == "") ? 0:to!long(e2);
-		this.y2 =  (e3 == "") ? 0:to!long(e3);
-	}
-}
-
-/// 손익계산서 계정항목
-struct StatementNq {
-    /// [0] 통화
-    string currency;
-    /// [1] 항목코드
-    string statementCode;
-    /// [2] 항목명
-    string rowName;
-    /// [3] 당기 3분기 3개월
-    long now = 0;
-    /// [4] 당기 3분기 누적
-    long nowAcc = 0;
-    /// [5] 전기 3분기 3개월
-    long y1 = 0;
-    /// [6] 전기 3분기 누적
-    long y1Acc = 0;
-    /// [7] 전기
-    long y2 = 0;
-    /// [8] 전전기
-    long y2Acc = 0;
-
-	void setMoney(string now, string nowAcc, string y1, string y1Acc, string y2, string y2Acc) {
-		string n = strip(now).replace(",", "");
-        string na = strip(nowAcc).replace(",", "");
-        this.now    = (n == "")  ? 0:to!long(n);
-        this.nowAcc = (na == "") ? 0:to!long(na);
-
-        y1         = strip(y1).replace(",", "");
-        string y1a = strip(y1Acc).replace(",", "");
-        this.y1    = (y1 == "")  ? 0:to!long(y1);
-        this.y1Acc = (y1a == "") ? 0:to!long(y1a);
-
-        y2         = strip(y2)   .replace(",", "");
-        string y2a = strip(y2Acc).replace(",", "");
-        this.y2    = (y2 == "")  ? 0:to!long(y2);
-        this.y2Acc = (y2a == "") ? 0:to!long(y2a);
-
-	}
-}
-
+/// 포괄손익계산서
+alias Cis = Is;
 
 /// 손익계산서
 struct Is {
@@ -360,6 +297,71 @@ struct Is {
 		if(statements.length <= 0)
 			return true;
 		return false;
+	}
+}
+
+/// 계정항목
+struct Statement {
+	// [0] 통화
+	string currency;
+	// [1] 항목코드
+	string statementCode;
+	// [2] 항목명
+	string rowName;
+	// [3] 당기
+	long now = 0;
+	// [4] 전기
+	long y1 = 0;
+	// [5] 전전기
+	long y2 = 0;
+
+	void setMoney(string now, string y1, string y2) {
+		string e1 = strip(now).replace(",", "");
+		string e2 = strip(y1).replace(",", "");
+		string e3 = strip(y2).replace(",", "");
+		this.now = (e1 == "") ? 0:to!long(e1);
+		this.y1 =  (e2 == "") ? 0:to!long(e2);
+		this.y2 =  (e3 == "") ? 0:to!long(e3);
+	}
+}
+
+/// 손익계산서 계정항목
+struct StatementNq {
+    /// [0] 통화
+    string currency;
+    /// [1] 항목코드
+    string statementCode;
+    /// [2] 항목명
+    string rowName;
+    /// [3] 당기 3분기 3개월
+    long now = 0;
+    /// [4] 당기 3분기 누적
+    long nowAcc = 0;
+    /// [5] 전기 3분기 3개월
+    long y1 = 0;
+    /// [6] 전기 3분기 누적
+    long y1Acc = 0;
+    /// [7] 전기
+    long y2 = 0;
+    /// [8] 전전기
+    long y2Acc = 0;
+
+	void setMoney(string now, string nowAcc, string y1, string y1Acc, string y2, string y2Acc) {
+		string n = strip(now).replace(",", "");
+        string na = strip(nowAcc).replace(",", "");
+        this.now    = (n == "")  ? 0:to!long(n);
+        this.nowAcc = (na == "") ? 0:to!long(na);
+
+        y1         = strip(y1).replace(",", "");
+        string y1a = strip(y1Acc).replace(",", "");
+        this.y1    = (y1 == "")  ? 0:to!long(y1);
+        this.y1Acc = (y1a == "") ? 0:to!long(y1a);
+
+        y2         = strip(y2)   .replace(",", "");
+        string y2a = strip(y2Acc).replace(",", "");
+        this.y2    = (y2 == "")  ? 0:to!long(y2);
+        this.y2Acc = (y2a == "") ? 0:to!long(y2a);
+
 	}
 }
 

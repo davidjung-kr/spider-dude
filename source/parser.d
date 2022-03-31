@@ -46,6 +46,7 @@ class Parser {
     private ReportType _reportType;
 	private StatementType _statementType;
 	private int colSize = 0;
+	private Period _period;
 
 	/**
      * 생성자
@@ -58,6 +59,7 @@ class Parser {
      */
 	this(string year, Period p, ReportType rt, StatementType st) {
         this._year = year;
+		this._period = p;
         this._reportType = rt;
         this._statementType = st;
 		string pattern =  format("%s_%s_%s_%s_*.txt",
@@ -92,6 +94,7 @@ class Parser {
 		switch(this._statementType) {
 		case StatementType.BS: readBalanceSheet(rpt); break;
 		case StatementType.IS: readIncomeSheet(rpt); break;
+		case StatementType.CIS:readComprehensiveIncomeSheet(rpt); break;
 		default: break;
 		}
 	}
@@ -133,6 +136,45 @@ class Parser {
 		}
 		f.close();
         rpt.income = incomeSheet;
+	}
+
+	/**
+	 * 포괄손익계산서 로드
+	 */
+	private void readComprehensiveIncomeSheet(ref Report rpt) {
+		Cis[string] comprehensiveIncomeSheet;
+		File f = File(this._fileName, "r");
+		f.readln();
+		while(!f.eof()) {
+			string line = f.readln();
+			string[] cell = line.split("\t");
+			if(cell.length <= 0) continue;
+			string code = cell[1][1..7];
+
+			if(code !in comprehensiveIncomeSheet) { // 없으면 신규 등록
+				Cis newComprehensiveIncomeSheet;
+				newComprehensiveIncomeSheet.type = cell[0]; // 재무제표종류
+				newComprehensiveIncomeSheet.code = code; // 종목코드
+				newComprehensiveIncomeSheet.name = cell[2]; // 회사명
+				newComprehensiveIncomeSheet.market = cell[3]; // 시장구분
+				newComprehensiveIncomeSheet.sector = cell[4]; // 업종
+				newComprehensiveIncomeSheet.sectorName = cell[5]; // 업종명
+				newComprehensiveIncomeSheet.endMonth = cell[6]; // 결산월
+				newComprehensiveIncomeSheet.endDay = cell[7]; // 결산기준일
+				newComprehensiveIncomeSheet.report = cell[8]; // 보고서종류
+				
+				comprehensiveIncomeSheet[newComprehensiveIncomeSheet.code] = newComprehensiveIncomeSheet;
+			}
+
+			StatementNq st = StatementNq();
+			st.currency = cell[9];         // 통화코드
+			st.statementCode = strip(cell[10]); // 항목코드
+			st.rowName  = strip(cell[11]); // 항목명
+			st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			comprehensiveIncomeSheet[code].statements ~= st;
+		}
+		f.close();
+        rpt.comprehensiveIncome = comprehensiveIncomeSheet;
 	}
 
 	private void readBalanceSheet(ref Report rpt) {

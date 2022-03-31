@@ -52,14 +52,14 @@ class Formula {
     FormulaResult[][string] query(FormulaName[] formulaNames) {
         FormulaResult[][string] result;
         foreach(b; report.balance) {
-            foreach(formulaEnum; formulaNames) {
-                string key = GetCodeFrom.formulaName(formulaEnum);
+            foreach(enumName; formulaNames) {
+                string key = GetCodeFrom.formulaName(enumName);
                 string code = b.code;
                 FormulaResult r = FormulaResult(code);
-                switch(formulaEnum){
-                case FormulaName.NCAV: r.value = calcNcav(code); break;
-                case FormulaName.PBR:  r.ratio = calcPbr(code); break;
-                case FormulaName.PER:  r.ratio = calcPer(code); break;
+                switch(enumName) {
+                case FormulaName.NCAV:     r.value = calcNcav(code);    break;
+                case FormulaName.PBR:      r.ratio = calcPbr(code);     break;
+                case FormulaName.PER:      r.ratio = calcPer(code);     break;
                 case FormulaName.EV_EBITA: r.ratio = calcEvEbita(code); break;
                 default: continue;
                 }
@@ -166,11 +166,11 @@ class Formula {
      *  code = 종목코드
      */
     private float calcPer(string code) {
-        Is income = report.getIncomeStatement(code);
-        if(income.empty)
+        Cis cIncome = report.getComprehensiveIncomeStatement(code);
+        if(cIncome.empty)
             return -1;
         double marketCap = report.getMarketCap(code).to!double;
-        double fullProfitloss = income.q(IfrsCode.FULL_PROFITLOSS).to!double;
+        double fullProfitloss = cIncome.q(IfrsCode.FULL_PROFITLOSS).to!double;
 
        if(marketCap==0 || fullProfitloss==0)
             return -1;

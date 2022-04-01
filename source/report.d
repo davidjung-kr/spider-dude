@@ -39,6 +39,16 @@ class Report {
     /// 전종목시세정보 정보
     public OutBlock[string] blocks;
 
+    /// 포괄손익계산서 여부
+    public bool isComprehensive() {
+        ulong cisLength = _cIncome.length;
+        ulong isLength = _income.length;
+        if(cisLength <= 0 && isLength <= 0) {
+            throw new Exception("Please load a income or comprehensive income statement first.");
+        }
+        return cisLength > 0;
+    }
+
     /**
      * 상장 종목만 남겨두기
      * 
@@ -119,31 +129,39 @@ class Report {
     public int filteringIntersectionCorpCode() {
         string[] krxCorpCodes = blocks.keys;
         string[] bsCorpCodes = _balance.keys;
-        string[] isCorpCodes;
-        if(_cIncome == null)
-            isCorpCodes = _income.keys;
-        else isCorpCodes = _cIncome.keys;
+
+        // 포괄을 쓸 껀 지 손익계산서 쓸건 지 결정
+        StatementType type = _cIncome.length > 0 ? StatementType.CIS:StatementType.IS;
+        string[] isCorpCodes =  type == StatementType.CIS ? _cIncome.keys : _income.keys;
 
         Bs[string] tempBs;
-        Is[string] tempIs;
+        Cis[string] tempIs;
         OutBlock[string] tempBlocks;
         uint count = 0;
         foreach(string code; krxCorpCodes) {
-            if(countUntil(bsCorpCodes, code) < 0 ||
-                countUntil(isCorpCodes, code) < 0)
+            if(countUntil(bsCorpCodes, code) < 0 || countUntil(isCorpCodes, code) < 0)
                 continue;
 
             tempBs[code] = _balance[code];
-            if(_cIncome == null)
-                tempIs[code] = _income[code];
-            else
+            if(type == StatementType.CIS) {
                 tempIs[code] = _cIncome[code];
+            }
+            else {
+                tempIs[code] = _income[code];
+            }
             tempBlocks[code] = blocks[code];
             count++;
         }
+        import std.stdio;
 
+        if(type == StatementType.CIS) {
+            _cIncome = tempIs;
+        }
+        else {
+            _income = tempIs;
+        }
         _balance = tempBs;
-        _income = tempIs;
+        
         blocks = tempBlocks;
         return count;
     }

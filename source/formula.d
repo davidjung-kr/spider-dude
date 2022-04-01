@@ -61,6 +61,7 @@ class Formula {
                 case FormulaName.PBR:      r.ratio = calcPbr(code);     break;
                 case FormulaName.PER:      r.ratio = calcPer(code);     break;
                 case FormulaName.EV_EBITA: r.ratio = calcEvEbita(code); break;
+                case FormulaName.GP_A:     r.ratio = calcGpa(code);     break;
                 default: continue;
                 }
                 if(r.notEmpty) {
@@ -120,6 +121,22 @@ class Formula {
     }
 
     /**
+     * GP/A 취득
+     * 
+     * calcGpa를 래핑한 메소드 입니다.
+     * See_Also: this.calcGpa
+     */
+    public FormulaResult[] gpa() {
+        FormulaResult[] result;
+        foreach(b; report.balance) {
+            FormulaResult r = FormulaResult(b.code);
+            r.ratio = calcGpa(b.code);
+            result ~= r;
+        }
+        return result;
+    }
+
+    /**
      * NCAV 계산
      * 
      * 유동자산에서 총부채 제거한 값을 취득 합니다.
@@ -169,11 +186,13 @@ class Formula {
         Cis cIncome = report.getComprehensiveIncomeStatement(code);
         if(cIncome.empty)
             return -1;
-        double marketCap = report.getMarketCap(code).to!double;
+        ulong marketCap = report.getMarketCap(code);
         double fullProfitloss = cIncome.q(IfrsCode.FULL_PROFITLOSS).to!double;
 
-       if(marketCap==0 || fullProfitloss==0)
+       if(marketCap==0 || fullProfitloss==0) {
             return -1;
+       }
+            
 
         return marketCap/fullProfitloss;
     }
@@ -207,5 +226,32 @@ class Formula {
         long ebita = incomeLoss+expense;
 
         return ev/ebita;
+    }
+
+    /**
+     * GP/A 계산
+     * 
+     * Params:
+     *  code = 종목코드
+     */
+    private float calcGpa(string code) {
+        Bs balance = report.getBalanceStatement(code);
+        if(balance.empty)
+            return -1;
+        ulong fullAssets = balance.q(IfrsCode.FULL_ASSETS);
+        ulong fullGrossProfit = 0;
+
+        if(report.isComprehensive()) {
+            Cis income = report.getComprehensiveIncomeStatement(code);
+            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT);
+        } else {
+            Is income = report.getIncomeStatement(code);
+            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT);
+        }
+        
+        if(fullGrossProfit==0 || fullAssets==0)
+            return -1;
+        
+        return fullGrossProfit/fullAssets;
     }
 }

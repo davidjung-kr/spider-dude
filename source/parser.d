@@ -113,7 +113,7 @@ class Parser {
 			string code = cell[1][1..7];
 
 			if(code !in incomeSheet) { // 없으면 신규 등록
-				Is newIncomeSheet;
+				Is newIncomeSheet = Is(this._period);
 				newIncomeSheet.type = cell[0]; // 재무제표종류
 				newIncomeSheet.code = code; // 종목코드
 				newIncomeSheet.name = cell[2]; // 회사명
@@ -152,7 +152,7 @@ class Parser {
 			string code = cell[1][1..7];
 
 			if(code !in comprehensiveIncomeSheet) { // 없으면 신규 등록
-				Cis newComprehensiveIncomeSheet;
+				Cis newComprehensiveIncomeSheet = Cis(this._period);
 				newComprehensiveIncomeSheet.type = cell[0]; // 재무제표종류
 				newComprehensiveIncomeSheet.code = code; // 종목코드
 				newComprehensiveIncomeSheet.name = cell[2]; // 회사명
@@ -170,7 +170,12 @@ class Parser {
 			st.currency = cell[9];         // 통화코드
 			st.statementCode = strip(cell[10]); // 항목코드
 			st.rowName  = strip(cell[11]); // 항목명
-			st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			// 사업보고서 인지 아닌 지에 따라, 금액에 대한 항목 세팅이 다름
+			if(_period == Period.Y4) {
+				st.setMoney("0", cell[13], "0", "0", cell[16], cell[17]);
+			} else {
+				st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			}
 			comprehensiveIncomeSheet[code].statements ~= st;
 		}
 		f.close();

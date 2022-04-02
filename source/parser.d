@@ -67,7 +67,7 @@ class Parser {
 									GetCodeFrom.period(p),
 									GetCodeFrom.reportType(rt),
 									GetCodeFrom.statementType(st));
-		auto list = dirEntries("", pattern, SpanMode.breadth);
+		auto list = dirEntries("dartdata/", pattern, SpanMode.breadth);
 		
 		if(list.empty)
 			throw new Exception("Can't find file with this pattern => " ~ pattern);

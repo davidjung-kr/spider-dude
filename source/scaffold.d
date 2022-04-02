@@ -41,7 +41,8 @@ class NetNetStocks {
 		auto ncavs = result["NCAV"];
 		auto pers = result["PER"];
 
-		File ff = File("cfs.txt", "w");
+		string current = Clock.currTime().toISOString();
+		File ff = File("NetNetStocks_"~current~".txt", "w");
 		ff.writeln("종목코드\t종목명\tCAP\tCurrent cash\t매출액\t당기순이익\tPER");
 		for(int i=0; i<ncavs.length; i++) {
 			FormulaResult ncav = ncavs[i];

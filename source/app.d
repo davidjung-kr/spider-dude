@@ -9,9 +9,14 @@ module com.davidjung.spider.app;
  * License: GPL-3.0
  */
 
+import com.davidjung.spider.scaffold;
+import com.davidjung.spider.types;
+
 extern(Windows) int SetConsoleOutputCP(uint);
 
 void main() {
 	if(SetConsoleOutputCP(65001) == 0)
         throw new Exception("Failed");
+
+        new NetNetStocks(Period.Y4, ReportType.OFS);
 }

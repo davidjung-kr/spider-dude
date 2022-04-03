@@ -96,6 +96,23 @@ class Downloader {
         f.close();
         return res.blocks.length;
     }
+
+
+    public void getKofiaBondYield() {
+        auto content = post("https://www.kofiabond.or.kr/proframeWeb/XMLSERVICES/", 
+            `<?xml version="1.0" encoding="utf-8"?><message><proframeHeader>
+    <pfmAppName>BIS-KOFIABOND</pfmAppName>
+    <pfmSvcName>BISBndSrtPrcSrchSO</pfmSvcName>
+    <pfmFnName>getHeadList</pfmFnName>
+  </proframeHeader>
+  <systemHeader></systemHeader>
+    <BISBndSrtPrcDayDTO>
+    <standardDt>20220401</standardDt>
+    <applyGbCd>C02</applyGbCd>
+</BISBndSrtPrcDayDTO>
+</message>`
+        );
+    }
 }
 
 struct DartUrl {
@@ -251,4 +268,7 @@ unittest {
     assert("0" == funcTestBlock.cleansingForNumeric(dirtyString));
     assert(0 == funcTestBlock.numbericToUlong(dirtyString));
     assert(0 == funcTestBlock.numbericToUint(dirtyString));
+
+
+    client.getKofiaBondYield();
 }

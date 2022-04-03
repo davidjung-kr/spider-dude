@@ -43,7 +43,7 @@ class NetNetStocks {
 
 		string current = Clock.currTime().toISOString();
 		File ff = File("NetNetStocks_"~current~".txt", "w");
-		ff.writeln("종목코드\t종목명\tCAP\tCurrent cash\t매출액\t당기순이익\tPER");
+		ff.writeln("종목코드\t종목명\tCAP\tCurrent cash\t매출액\t당기순이익\tPER\t주가수익률\tNCAV");
 		for(int i=0; i<ncavs.length; i++) {
 			FormulaResult ncav = ncavs[i];
 			FormulaResult per = pers[i];
@@ -56,15 +56,17 @@ class NetNetStocks {
 			long profitloss = cis.q(IfrsCode.FULL_PROFITLOSS);
 
 			//float netProfit = profitloss/revenue;
-			if(ncav.value > cap) {
-				ff.writef("%s\t%s\t%d\t%d\t%d\t%d\t%f\n",
-					ncav.code,
-					myReport.getCorpName(ncav.code),
-					cap,
-					bs.q(IfrsCode.FULL_CURRENTASSETS),
-					cis.q(IfrsCode.FULL_REVENUE),
-					cis.q(IfrsCode.FULL_PROFITLOSS), per.ratio);
-			}
+			ff.writef("%s\t%s\t%d\t%d\t%d\t%d\t%f\t%f\t%f\n",
+				ncav.code,
+				myReport.getCorpName(ncav.code),
+				cap,
+				bs.q(IfrsCode.FULL_CURRENTASSETS),
+				cis.q(IfrsCode.FULL_REVENUE),
+				cis.q(IfrsCode.FULL_PROFITLOSS),
+				per.ratio,
+				1/per.ratio,
+				ncav.value
+				);
 		}
 	}
 }

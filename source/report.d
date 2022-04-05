@@ -119,6 +119,29 @@ class Report {
     }
 
     /**
+     * 코스닥 종목만 남기기
+     *
+     * 한국거래소 데이터 기준으로 코스닥 종목만 남깁니다.
+     * 인스턴스의 멤버필드(재무제표, 거래소 데이터 등)에 영향을 미칩니다.
+     * Returns: 제거한 후 남은 종목 수
+     */
+    public int filteringKosdaq() {
+        int count = 0;
+        Bs[string] tempBs;
+        OutBlock[string] tempBlocks;
+        foreach(string k; blocks.keys) {
+            if(blocks[k].mktNm == "KOSDAQ") {
+                tempBs[k] = _balance[k];
+                tempBlocks[k] = blocks[k];
+                count ++;
+            }
+        }
+        _balance = tempBs;
+        blocks = tempBlocks;
+        return count;
+    }
+
+    /**
      * 종목코드 교집합 처리
      *
      * 재무제표, 한국거래소에 존재하는 종목코드 교집합만 남기고

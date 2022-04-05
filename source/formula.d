@@ -173,7 +173,7 @@ class Formula {
        if(netEquity==0 || shares==0 || price==0)
             return -1;
         float bps = (netEquity/shares).to!float;
-        return bps/price;
+        return price/bps;
     }
 
     /**
@@ -238,20 +238,20 @@ class Formula {
         Bs balance = report.getBalanceStatement(code);
         if(balance.empty)
             return -1;
-        ulong fullAssets = balance.q(IfrsCode.FULL_ASSETS);
-        ulong fullGrossProfit = 0;
+        double fullAssets = balance.q(IfrsCode.FULL_ASSETS).to!double;
+        double fullGrossProfit = 0;
 
         if(report.isComprehensive()) {
             Cis income = report.getComprehensiveIncomeStatement(code);
-            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT);
+            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT).to!double;
         } else {
             Is income = report.getIncomeStatement(code);
-            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT);
+            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT).to!double;
         }
         
         if(fullGrossProfit==0 || fullAssets==0)
             return -1;
         
-        return fullGrossProfit/fullAssets;
+        return fullAssets/fullGrossProfit;
     }
 }

@@ -41,6 +41,16 @@ enum IfrsCode {
 	FULL_ASSETS,
     /// `ifrs-full_CurrentAssets`: 유동자산
     FULL_CURRENTASSETS,
+	/// `ifrs-full_CashAndCashEquivalents`: 현금및현금성자산
+	FULL_CASH_AND_CASH_EQUIVALENTS,
+	/// `ifrs-full_Inventories`: 재고자산
+	FULL_INVENTORIES,
+	/// `ifrs-full_NoncurrentAssets`: 비유동자산
+	FULL_NONCURRENTASSETS,
+	/// `ifrs-full_PropertyPlantAndEquipment`: 유형자산
+	FULL_PROPERTY_PLANT_AND_EQUIPMENT,
+	/// `ifrs-full_IntangibleAssetsOtherThanGoodwill`: 무형자산
+	FULL_INTANGIBLE_ASSETS_OTHER_THAN_GOODWILL,
     /// `ifrs-full_Liabilities`: 부채총계
     FULL_LIABILITIES,
 	/// `ifrs-full_equity`: 자본총계
@@ -56,6 +66,8 @@ enum IfrsCode {
 
 /// DART 코드
 enum DartCode {
+	/// `dart_ShortTermTradeReceivable`: 매출채권
+	SHORT_TERM_TRADE_RECEIVABLE,
 	/// `dart_DepreciationExpense`:감가상각비
 	DEPRECIATION_EXPENSE,
 	/// `dart_OperatingIncomeLoss`:영업이익
@@ -418,6 +430,11 @@ struct GetCodeFrom {
         switch(e) {
 		case IfrsCode.FULL_ASSETS:        return "ifrs-full_Assets";
         case IfrsCode.FULL_CURRENTASSETS: return "ifrs-full_CurrentAssets";
+		case IfrsCode.FULL_CASH_AND_CASH_EQUIVALENTS: return "ifrs-full_CashAndCashEquivalents";
+		case IfrsCode.FULL_INVENTORIES: return "ifrs-full_Inventories";
+		case IfrsCode.FULL_NONCURRENTASSETS: return "ifrs-full_NoncurrentAssets";
+		case IfrsCode.FULL_PROPERTY_PLANT_AND_EQUIPMENT: return "ifrs-full_PropertyPlantAndEquipment";
+		case IfrsCode.FULL_INTANGIBLE_ASSETS_OTHER_THAN_GOODWILL: return "ifrs-full_IntangibleAssetsOtherThanGoodwill";
         case IfrsCode.FULL_LIABILITIES:   return "ifrs-full_Liabilities";
 		case IfrsCode.FULL_REVENUE:       return "ifrs-full_Revenue";
         case IfrsCode.FULL_PROFITLOSS:    return "ifrs-full_ProfitLoss";
@@ -430,6 +447,7 @@ struct GetCodeFrom {
 	/// DartCode Enum을 String으로
 	public static string dartCode(DartCode e) @safe {
         switch(e) {
+		case DartCode.SHORT_TERM_TRADE_RECEIVABLE: return "dart_ShortTermTradeReceivable";
 		case DartCode.DEPRECIATION_EXPENSE:  return "dart_DepreciationExpense";
 		case DartCode.OPERATING_INCOME_LOSS: return "dart_OperatingIncomeLoss";
 		case DartCode.AMORTISATION_EXPENSE:  return "dart_AmortisationExpense";

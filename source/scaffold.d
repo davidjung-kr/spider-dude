@@ -155,3 +155,12 @@ class LowPerStocks {
 		}*/
 	}
 }
+
+/// 보고서 기본 컬럼목록
+struct DefaultRows {
+	string corpCode; /// 종목코드
+	string corpName; /// 종목명
+	ulong marketCap; /// 시가총액
+	ulong listedShares; /// 상장주식수
+	uint closePrice; /// 종가
+}

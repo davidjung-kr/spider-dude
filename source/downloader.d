@@ -59,6 +59,7 @@ class Downloader {
      */
     void readKrxCapAllByBlock(Date date, ref Report rpt) {
         rpt.blocks = getKrxCapAllByBlock(date);
+        rpt.refreshCorpCode();
     }
 
     /**

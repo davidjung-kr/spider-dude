@@ -164,3 +164,27 @@ struct DefaultRows {
 	ulong listedShares; /// 상장주식수
 	uint closePrice; /// 종가
 }
+
+class DefaultReport {
+	this(Date ymd, Period period, ReportType reportType) {
+		Report myReport = new Report();
+		Downloader krxClient = new Downloader();
+		krxClient.readKrxCapAllByBlock(ymd, myReport);
+
+
+		Parser balacneSheet = new Parser("2022", period, reportType, StatementType.BS);
+		balacneSheet.read(myReport);
+
+		Parser incomeSheet = new Parser("2022", period, reportType, StatementType.CIS);
+		incomeSheet.read(myReport);
+		
+		// 4. 비정상 종목 필터링
+		myReport.filteringOnlyListed();			   // 비상장 종목
+		myReport.filteringNotCapZero();			   // 상장폐지 종목
+		myReport.filteringNotChineseCompany();     // 중국회사 제거
+		myReport.filteringIntersectionCorpCode();  // 재무데이터 있는 종목만 남기기
+	}
+
+	void fetch() {
+	}
+}

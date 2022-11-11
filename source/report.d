@@ -36,6 +36,9 @@ class Report {
 	/// 손익계산서(Setter)
 	@property void income(Is[string] income) { this._income = income; }
 
+    /// 종목코드
+    private string[] corpCodes;
+
     /// 전종목시세정보 정보
     public OutBlock[string] blocks;
 
@@ -47,6 +50,21 @@ class Report {
             throw new Exception("Please load a income or comprehensive income statement first.");
         }
         return cisLength > 0;
+    }
+
+    /**
+     * 종목코드 업데이트
+     */
+    public void refreshCorpCode() {
+        ulong len = blocks.length;
+        if(len <= 0)
+            return;
+        this.corpCodes = blocks.keys;
+        // string[] codes = [];
+        // for(int i=0; i<len; i++) {
+        //     codes ~= blocks[cast(int)i].isuSrtCd;
+        // }
+        // this.corpCodes = codes;
     }
 
     /**

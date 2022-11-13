@@ -250,4 +250,9 @@ class Report {
     public ulong getListShared(string code) {
         return blocks[code].listShared;
     }
+
+    /// 종목코드 목록
+    public string[] getCorpCodes() {
+        return this.corpCodes;
+    }
 }

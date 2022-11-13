@@ -12,6 +12,7 @@ module com.davidjung.spider.scaffold;
 import std.stdio;
 import std.datetime;
 import std.math;
+import std.conv;
 import com.davidjung.spider.parser;
 import com.davidjung.spider.types;
 import com.davidjung.spider.formula;
@@ -157,7 +158,7 @@ class LowPerStocks {
 }
 
 /// 보고서 기본 컬럼목록
-struct DefaultRows {
+struct DefaultRow {
 	string corpCode; /// 종목코드
 	string corpName; /// 종목명
 	ulong marketCap; /// 시가총액
@@ -166,25 +167,37 @@ struct DefaultRows {
 }
 
 class DefaultReport {
+	private Report rpt;
 	this(Date ymd, Period period, ReportType reportType) {
-		Report myReport = new Report();
+		this.rpt = new Report();
 		Downloader krxClient = new Downloader();
-		krxClient.readKrxCapAllByBlock(ymd, myReport);
+		krxClient.readKrxCapAllByBlock(ymd, this.rpt);
 
-
-		Parser balacneSheet = new Parser("2022", period, reportType, StatementType.BS);
-		balacneSheet.read(myReport);
-
-		Parser incomeSheet = new Parser("2022", period, reportType, StatementType.CIS);
-		incomeSheet.read(myReport);
+		string year = ymd.year.to!string;
+		Parser balacneSheet = new Parser(year, period, reportType, StatementType.BS);
+		balacneSheet.read(this.rpt);
+		Parser incomeSheet = new Parser(year, period, reportType, StatementType.CIS);
+		incomeSheet.read(this.rpt);
 		
-		// 4. 비정상 종목 필터링
-		myReport.filteringOnlyListed();			   // 비상장 종목
-		myReport.filteringNotCapZero();			   // 상장폐지 종목
-		myReport.filteringNotChineseCompany();     // 중국회사 제거
-		myReport.filteringIntersectionCorpCode();  // 재무데이터 있는 종목만 남기기
+		//this.rpt.filteringOnlyListed();			   // 비상장 종목
+		//this.rpt.filteringNotCapZero();			   // 상장폐지 종목
+		//this.rpt.filteringNotChineseCompany();     // 중국회사 제거
+		//this.rpt.filteringIntersectionCorpCode();  // 재무데이터 있는 종목만 남기기
 	}
 
-	void fetch() {
+	public DefaultRow[] fetch() {
+		string[] codes = this.rpt.getCorpCodes();
+		DefaultRow[] rows;
+
+		for(int i=0; i<codes.length; i++) {
+			DefaultRow row = DefaultRow();
+			row.corpCode = codes[i]; /// 종목코드
+			row.corpName = rpt.getCorpName(codes[i]); /// 종목명
+			row.marketCap = rpt.getMarketCap(codes[i]); /// 시가총액
+			row.listedShares = rpt.getListShared(codes[i]); /// 상장주식수
+			row.closePrice = rpt.getClosePrice(codes[i]); /// 종가
+			rows ~= row;
+		}
+		return rows;
 	}
 }

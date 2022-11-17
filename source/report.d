@@ -207,14 +207,35 @@ class Report {
         return count;
     }
 
+    /// 해당 종목코드로 재무상태표가 존재하는 지
+    public bool haveBalanceStatement(string code) {
+        if(code in _balance)
+            return true;
+        return false;
+    }
+
     /// 재무상태표
     public Bs getBalanceStatement(string code) {
         return _balance[code];
     }
 
+    /// 해당 종목코드로 포괄손익계산서가 존재하는 지
+    public bool haveComprehensiveIncomeStatement(string code) {
+        if(code in _cIncome)
+            return true;
+        return false;
+    }
+
     /// 포괄손익계산서
     public Cis getComprehensiveIncomeStatement(string code) {
         return _cIncome[code];
+    }
+
+    /// 해당 종목코드로 손익계산서가 존재하는 지
+    public bool haveIncomeStatement(string code) {
+        if(code in _income)
+            return true;
+        return false;
     }
 
     /// 손익계산서

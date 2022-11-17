@@ -523,25 +523,41 @@ struct Bs {
 	}
 
 	/// 계정항목들
-	Statement[] statements;
+	BalanceStatementItem[] items;
 
-	/// 재무제표 질의
-	long q(IfrsCode ifrsCode) {
-		for(int i=0; i<this.statements.length; i++) {
-			if(this.statements[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
-				return this.statements[i].now;
+	/// 당기 금액 질의
+	long getCurrentTerm(IfrsCode ifrsCode) {
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].itemCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+				return this.items[i].currentTerm;
 			}
 		}
 		return 0;
 	}
 
-	/**
-	 * 계정과목 비어있는 지 확인
-	 */
-	public bool empty() {
-		if(statements.length <= 0)
-			return true;
-		return false;
+	/// 전기 금액 질의
+	long getEndOfTheFirstPeriod(IfrsCode ifrsCode) {
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].itemCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+				return this.items[i].endOfTheFirstPeriod;
+			}
+		}
+		return 0;
+	}
+
+	/// 전전기 금액 질의
+	long getEndOfThePreviousPeriod(IfrsCode ifrsCode) {
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].itemCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+				return this.items[i].endOfThePreviousPeriod;
+			}
+		}
+		return 0;
+	}
+
+	/// 계정과목 비어있는 지 확인
+	public bool isItemsEmpty() {
+		return this.items.length <= 0;
 	}
 }
 
@@ -598,15 +614,15 @@ struct Cis {
 	}
 
 	/// 계정항목들
-	StatementNq[] statements;
+	StatementNq[] items;
 
 	/// 재무제표 질의
 	long q(IfrsCode ifrsCode) {
 		import std.stdio;
-		for(int i=0; i<this.statements.length; i++) {
-			if(this.statements[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
 				// 사업보고서인지 여부에 따라 당기(nowAcc)인지 누적(now)인 지 항목이 달라짐
-				return _period == Period.Y4 ? this.statements[i].nowAcc : this.statements[i].now;
+				return _period == Period.Y4 ? this.items[i].nowAcc : this.items[i].now;
 			}
 		}
 		return 0;
@@ -616,9 +632,9 @@ struct Cis {
 	 * 다트 계정과목 조회
 	 */
 	long queryDartStatement(DartCode dartCode) {
-		for(int i=0; i<this.statements.length; i++) {
-			if(this.statements[i].statementCode == GetCodeFrom.dartCode(dartCode)) {
-				return this.statements[i].now;
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].statementCode == GetCodeFrom.dartCode(dartCode)) {
+				return this.items[i].now;
 			}
 		}
 		return 0;
@@ -627,8 +643,8 @@ struct Cis {
 	/**
 	 * 계정과목 비어있는 지 확인
 	 */
-	public bool empty() {
-		if(statements.length <= 0)
+	public bool isItemsEmpty() {
+		if(items.length <= 0)
 			return true;
 		return false;
 	}
@@ -636,6 +652,77 @@ struct Cis {
 
 /// 손익계산서
 alias Is = Cis;
+
+/// 계정항목
+struct BalanceStatementItem {
+	/// 통화
+	private string _currency;
+	/// 항목코드
+	private string _itemCode;
+	/// 항목명
+	private string _itemName;
+	/// 당기
+	private long _currentTerm = 0;
+	/// 전기말
+	private long _endOfTheFirstPeriod = 0;
+	/// 전전기말
+	private long _endOfThePreviousPeriod = 0;
+
+	/// 통화
+	@property public string currency() {
+		return this._currency;
+	}
+
+	/// 항목코드
+	@property public string itemCode() {
+		return this._itemCode;
+	}
+
+	/// 항목명
+	@property public string itemName() {
+		return this._itemName;
+	}
+
+	/// 당기
+	@property public long currentTerm() {
+		return this._currentTerm;
+	}
+
+	/// 전기말
+	@property public long endOfTheFirstPeriod() {
+		return this._endOfTheFirstPeriod;
+	}
+
+	/// 전전기말
+	@property public long endOfThePreviousPeriod() {
+		return this._endOfThePreviousPeriod;
+	}
+
+	/**
+	 * 생성자
+	 * Params:
+	 *	currency = 통화코드
+	 *	itemCode = 항목코드
+	 *	itemName = 항목명
+	 *	currentTerm = 당기
+	 *	eofp = 전기
+	 *	eopp = 전전기
+	 */
+	this(string currency, string itemCode, string itemName, string currentTerm, string eofp, string eopp) {
+		this._currency = currency;
+		this._itemCode = itemCode;
+		this._itemName = itemName;
+		this._currentTerm     = amountStringToLong(currentTerm);
+		this._endOfTheFirstPeriod    = amountStringToLong(eofp);
+		this._endOfThePreviousPeriod = amountStringToLong(eopp);
+	}
+
+	/** 금액형태의 문자열을 long형태로 변환 */
+	private long amountStringToLong(string numeric) {
+		string cleanedNumeric = strip(numeric).replace(",", "");
+		return cleanedNumeric=="" ? 0:cleanedNumeric.to!long;
+	}
+}
 
 /// 계정항목
 struct Statement {

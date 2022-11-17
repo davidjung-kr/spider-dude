@@ -127,12 +127,12 @@ class Parser {
 				incomeSheet[newIncomeSheet.code] = newIncomeSheet;
 			}
 
-			StatementNq st = StatementNq();
-			st.currency = cell[9];         // 통화코드
-			st.statementCode = strip(cell[10]); // 항목코드
-			st.rowName  = strip(cell[11]); // 항목명
-			st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
-			incomeSheet[code].statements ~= st;
+			StatementNq item = StatementNq();
+			item.currency = cell[9];         // 통화코드
+			item.statementCode = strip(cell[10]); // 항목코드
+			item.rowName  = strip(cell[11]); // 항목명
+			item.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			incomeSheet[code].items ~= item;
 		}
 		f.close();
         rpt.income = incomeSheet;
@@ -166,17 +166,17 @@ class Parser {
 				comprehensiveIncomeSheet[newComprehensiveIncomeSheet.code] = newComprehensiveIncomeSheet;
 			}
 
-			StatementNq st = StatementNq();
-			st.currency = cell[9];         // 통화코드
-			st.statementCode = strip(cell[10]); // 항목코드
-			st.rowName  = strip(cell[11]); // 항목명
+			StatementNq item = StatementNq();
+			item.currency = cell[9];         // 통화코드
+			item.statementCode = strip(cell[10]); // 항목코드
+			item.rowName  = strip(cell[11]); // 항목명
 			// 사업보고서 인지 아닌 지에 따라, 금액에 대한 항목 세팅이 다름
 			if(_period == Period.Y4) {
-				st.setMoney("0", cell[13], "0", "0", cell[16], cell[17]);
+				item.setMoney("0", cell[13], "0", "0", cell[16], cell[17]);
 			} else {
-				st.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+				item.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
 			}
-			comprehensiveIncomeSheet[code].statements ~= st;
+			comprehensiveIncomeSheet[code].items ~= item;
 		}
 		f.close();
         rpt.comprehensiveIncome = comprehensiveIncomeSheet;
@@ -184,6 +184,7 @@ class Parser {
 
 	private void readBalanceSheet(ref Report rpt) {
 		Bs[string] bs;
+
 
 		File f = File(this._fileName, "r");
 		f.readln();
@@ -210,12 +211,15 @@ class Parser {
 				bs[newBs.code] = newBs;
 			}
 
-			Statement st = Statement();
-			st.currency = cell[9]; // 통화코드
-			st.statementCode = strip(cell[10]); // 항목코드
-			st.rowName = strip(cell[11]); // 항목명
-			st.setMoney(cell[12], cell[13], cell[14]);
-			bs[code].statements ~= st;
+			BalanceStatementItem item = BalanceStatementItem(
+				cell[9],  // 통화코드
+				cell[10], // 항목코드
+				cell[11], // 항목명
+				cell[12], // 당기
+				cell[13], // 전기
+				cell[14]  // 전전기
+			);
+			bs[code].items ~= item;
 		}
         
 		f.close();

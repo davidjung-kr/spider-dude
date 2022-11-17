@@ -145,10 +145,10 @@ class Formula {
      */
     private ulong calcNcav(string code) {
         Bs balance = report.getBalanceStatement(code);
-        if(balance.empty)
+        if(balance.isItemsEmpty())
             return -1;
-        long fullCurrentassets = balance.q(IfrsCode.FULL_CURRENTASSETS);
-        long fullLiabilities = balance.q(IfrsCode.FULL_LIABILITIES);
+        long fullCurrentassets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
+        long fullLiabilities = balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
         long netCurrentassets = fullCurrentassets - fullLiabilities;
 
         return netCurrentassets;
@@ -164,9 +164,10 @@ class Formula {
      */
     private float calcPbr(string code) {
         Bs balance = report.getBalanceStatement(code);
-        if(balance.empty)
+        if(balance.isItemsEmpty())
             return -1;
-        ulong netEquity = balance.q(IfrsCode.FULL_ASSETS) - balance.q(IfrsCode.FULL_LIABILITIES);
+        ulong netEquity =
+            balance.getCurrentTerm(IfrsCode.FULL_ASSETS) - balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
         ulong shares = report.getListShared(code);
         uint price = report.getClosePrice(code);
         
@@ -184,7 +185,7 @@ class Formula {
      */
     private float calcPer(string code) {
         Cis cIncome = report.getComprehensiveIncomeStatement(code);
-        if(cIncome.empty)
+        if(cIncome.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
         double fullProfitloss = cIncome.q(IfrsCode.FULL_PROFITLOSS).to!double;
@@ -209,11 +210,11 @@ class Formula {
     private float calcEvEbita(string code) {
         Bs balance = report.getBalanceStatement(code);
         Is income = report.getIncomeStatement(code);
-        if(balance.empty || income.empty)
+        if(balance.isItemsEmpty() || income.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
-        ulong fullLiabilities = balance.q(IfrsCode.FULL_LIABILITIES);
-        ulong fullCurrentassets = balance.q(IfrsCode.FULL_CURRENTASSETS);
+        ulong fullLiabilities = balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
+        ulong fullCurrentassets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
     
         ulong incomeLoss = income.queryDartStatement(DartCode.OPERATING_INCOME_LOSS);
         ulong expense = income.queryDartStatement(DartCode.DEPRECIATION_EXPENSE) +
@@ -236,9 +237,9 @@ class Formula {
      */
     private float calcGpa(string code) {
         Bs balance = report.getBalanceStatement(code);
-        if(balance.empty)
+        if(balance.isItemsEmpty())
             return -1;
-        double fullAssets = balance.q(IfrsCode.FULL_ASSETS).to!double;
+        double fullAssets = balance.getCurrentTerm(IfrsCode.FULL_ASSETS).to!double;
         double fullGrossProfit = 0;
 
         if(report.isComprehensive()) {

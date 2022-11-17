@@ -61,7 +61,7 @@ class NetNetStocks {
 				ncav.code,
 				myReport.getCorpName(ncav.code),
 				cap,
-				bs.q(IfrsCode.FULL_CURRENTASSETS),
+				bs.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS),
 				cis.q(IfrsCode.FULL_REVENUE),
 				cis.q(IfrsCode.FULL_PROFITLOSS),
 				per.ratio,
@@ -113,7 +113,7 @@ class GpaStocks {
 			ff.writef("'%s\t%s\t%d\t%d\t%f\t%f\t%f\n",
 				pbr.code,
 				myReport.getCorpName(pbr.code),
-				balance.q(IfrsCode.FULL_ASSETS),
+				balance.getCurrentTerm(IfrsCode.FULL_ASSETS),
 				income.q(IfrsCode.FULL_GROSSPROFIT),
 				gpa.ratio,
 				pbr.ratio,
@@ -164,6 +164,8 @@ struct DefaultRow {
 	ulong marketCap; /// 시가총액
 	ulong listedShares; /// 상장주식수
 	uint closePrice; /// 종가
+	ulong fullCurrentAssets; // 유동자산
+	ulong fullCashAndCashEquivalents; // 현금성자산
 }
 
 class DefaultReport {
@@ -189,13 +191,26 @@ class DefaultReport {
 		string[] codes = this.rpt.getCorpCodes();
 		DefaultRow[] rows;
 
+		// 재무제표
 		for(int i=0; i<codes.length; i++) {
+			string code = codes[i]; /// 종목코드
+			
+			if(rpt.haveBalanceStatement(code)==false) {
+				import std.stdio;
+				writef("[%s(%s)]는 재무제표가 없어 스킵합니다.\n", rpt.getCorpName(codes[i]), code);
+				continue;
+			}
+
 			DefaultRow row = DefaultRow();
-			row.corpCode = codes[i]; /// 종목코드
+			row.corpCode = code;
 			row.corpName = rpt.getCorpName(codes[i]); /// 종목명
 			row.marketCap = rpt.getMarketCap(codes[i]); /// 시가총액
 			row.listedShares = rpt.getListShared(codes[i]); /// 상장주식수
 			row.closePrice = rpt.getClosePrice(codes[i]); /// 종가
+			
+			Bs balance = rpt.getBalanceStatement(codes[i]);
+			row.fullCurrentAssets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
+			row.fullCashAndCashEquivalents = balance.getCurrentTerm(IfrsCode.FULL_CASH_AND_CASH_EQUIVALENTS);	
 			rows ~= row;
 		}
 		return rows;

@@ -127,11 +127,14 @@ class Parser {
 				incomeSheet[newIncomeSheet.code] = newIncomeSheet;
 			}
 
-			StatementNq item = StatementNq();
-			item.currency = cell[9];         // 통화코드
-			item.statementCode = strip(cell[10]); // 항목코드
-			item.rowName  = strip(cell[11]); // 항목명
-			item.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
+			IncomeStatementItem item = IncomeStatementItem(
+				cell[9], // 통화코드
+				cell[10], // 항목코드
+				cell[11] // 항목명
+			);
+			item.setCurrentAmount(    cell[12], this._period == Period.Y4 ? cell[12]:cell[13]); // 당기
+			item.setFirstPeriodAmount(cell[14], this._period == Period.Y4 ? cell[14]:cell[15]); // 전기
+			item.setFirstPeriodAmount(cell[16], this._period == Period.Y4 ? cell[16]:cell[17]); // 전전기
 			incomeSheet[code].items ~= item;
 		}
 		f.close();
@@ -165,17 +168,15 @@ class Parser {
 				
 				comprehensiveIncomeSheet[newComprehensiveIncomeSheet.code] = newComprehensiveIncomeSheet;
 			}
-
-			StatementNq item = StatementNq();
-			item.currency = cell[9];         // 통화코드
-			item.statementCode = strip(cell[10]); // 항목코드
-			item.rowName  = strip(cell[11]); // 항목명
-			// 사업보고서 인지 아닌 지에 따라, 금액에 대한 항목 세팅이 다름
-			if(_period == Period.Y4) {
-				item.setMoney("0", cell[13], "0", "0", cell[16], cell[17]);
-			} else {
-				item.setMoney(cell[12], cell[13], cell[14], cell[15], cell[16], cell[17]);
-			}
+			
+			IncomeStatementItem item = IncomeStatementItem(
+				cell[9], // 통화코드
+				cell[10], // 항목코드
+				cell[11] // 항목명
+			);
+			item.setCurrentAmount(    cell[12], this._period == Period.Y4 ? cell[12]:cell[13]); // 당기
+			item.setFirstPeriodAmount(cell[14], this._period == Period.Y4 ? cell[14]:cell[15]); // 전기
+			item.setFirstPeriodAmount(cell[16], this._period == Period.Y4 ? cell[16]:cell[17]); // 전전기
 			comprehensiveIncomeSheet[code].items ~= item;
 		}
 		f.close();

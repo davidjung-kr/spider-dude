@@ -16,14 +16,17 @@ import com.davidjung.spider.scaffold;
 
 void main() {
         writeln("Please load a sample reports from scaffold.d");
-        // auto report = new DefaultReport(
-        //         Date(2022, 11, 11),
-        //         Period.Y3,
-        //         ReportType.CFS
-        // );
-        
-        // DefaultRow[] rows = report.fetch();
-        // foreach(DefaultRow row; rows) {
-        //         writeln(row);
-        // }
+        auto report = new DefaultReport(
+                Date(2022, 11, 18),
+                Period.Y3,
+                ReportType.OFS
+        );
+
+        File f = File("default_report.csv", "w");
+        DefaultRow[] rows = report.fetch();
+        f.writeln(rows[0].getColumnsLine());
+        foreach(DefaultRow row; rows) {
+                f.writeln(row.getDatasLine());
+        }
+        f.close();
 }

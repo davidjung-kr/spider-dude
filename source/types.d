@@ -51,8 +51,12 @@ enum IfrsCode {
 	FULL_PROPERTY_PLANT_AND_EQUIPMENT,
 	/// `ifrs-full_IntangibleAssetsOtherThanGoodwill`: 무형자산
 	FULL_INTANGIBLE_ASSETS_OTHER_THAN_GOODWILL,
+
     /// `ifrs-full_Liabilities`: 부채총계
     FULL_LIABILITIES,
+	/// `ifrs-full_CurrentLiabilities`: 유동부채
+	FULL_CURRENT_LIABILITIES, 
+	
 	/// `ifrs-full_equity`: 자본총계
 	FULL_EQUITY,
 
@@ -60,6 +64,10 @@ enum IfrsCode {
 	FULL_REVENUE,
 	/// `ifrs-full_GrossProfit`: 매출총이익
 	FULL_GROSSPROFIT,
+	/// `ifrs-full_ProfitLossAttributableToOwnersOfParent`: 지배기업 소유주지분 순이익
+	FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT,
+	/// `ifrs-full_ProfitLossBeforeTax`: 법인세비용차감전순이익
+	FULL_PROFIT_LOSS_BEFORE_TAX,
     /// `ifrs-full_ProfitLoss`: 당기순이익
     FULL_PROFITLOSS
 }
@@ -435,10 +443,13 @@ struct GetCodeFrom {
 		case IfrsCode.FULL_NONCURRENTASSETS: return "ifrs-full_NoncurrentAssets";
 		case IfrsCode.FULL_PROPERTY_PLANT_AND_EQUIPMENT: return "ifrs-full_PropertyPlantAndEquipment";
 		case IfrsCode.FULL_INTANGIBLE_ASSETS_OTHER_THAN_GOODWILL: return "ifrs-full_IntangibleAssetsOtherThanGoodwill";
+		case IfrsCode.FULL_CURRENT_LIABILITIES: return "ifrs-full_CurrentLiabilities";
         case IfrsCode.FULL_LIABILITIES:   return "ifrs-full_Liabilities";
 		case IfrsCode.FULL_REVENUE:       return "ifrs-full_Revenue";
         case IfrsCode.FULL_PROFITLOSS:    return "ifrs-full_ProfitLoss";
 		case IfrsCode.FULL_EQUITY:        return "ifrs-full_Equity";
+		case IfrsCode.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT: return "ifrs-full_ProfitLossAttributableToOwnersOfParent";
+		case IfrsCode.FULL_PROFIT_LOSS_BEFORE_TAX: return "ifrs-full_ProfitLossBeforeTax";
 		case IfrsCode.FULL_GROSSPROFIT:   return "ifrs-full_GrossProfit";
         default: return "";
         }
@@ -614,27 +625,24 @@ struct Cis {
 	}
 
 	/// 계정항목들
-	StatementNq[] items;
+	IncomeStatementItem[] items;
 
-	/// 재무제표 질의
+	/// 재무제표 질의: 당기 누적을 기본으로 가져옴
 	long q(IfrsCode ifrsCode) {
 		import std.stdio;
 		for(int i=0; i<this.items.length; i++) {
-			if(this.items[i].statementCode == GetCodeFrom.ifrsCode(ifrsCode)) {
-				// 사업보고서인지 여부에 따라 당기(nowAcc)인지 누적(now)인 지 항목이 달라짐
-				return _period == Period.Y4 ? this.items[i].nowAcc : this.items[i].now;
+			if(this.items[i].itemCode == GetCodeFrom.ifrsCode(ifrsCode)) {
+				return this.items[i].currentAccumulation;
 			}
 		}
 		return 0;
 	}
 
-	/**
-	 * 다트 계정과목 조회
-	 */
+	/// 다트 계정과목 조회: 당기 누적을 긱본으로 가져옴
 	long queryDartStatement(DartCode dartCode) {
 		for(int i=0; i<this.items.length; i++) {
-			if(this.items[i].statementCode == GetCodeFrom.dartCode(dartCode)) {
-				return this.items[i].now;
+			if(this.items[i].itemCode == GetCodeFrom.dartCode(dartCode)) {
+				return this.items[i].currentAccumulation;
 			}
 		}
 		return 0;
@@ -653,7 +661,7 @@ struct Cis {
 /// 손익계산서
 alias Is = Cis;
 
-/// 계정항목
+/// 재무제표 계정항목
 struct BalanceStatementItem {
 	/// 통화
 	private string _currency;
@@ -716,75 +724,121 @@ struct BalanceStatementItem {
 		this._endOfTheFirstPeriod    = amountStringToLong(eofp);
 		this._endOfThePreviousPeriod = amountStringToLong(eopp);
 	}
-
-	/** 금액형태의 문자열을 long형태로 변환 */
-	private long amountStringToLong(string numeric) {
-		string cleanedNumeric = strip(numeric).replace(",", "");
-		return cleanedNumeric=="" ? 0:cleanedNumeric.to!long;
-	}
-}
-
-/// 계정항목
-struct Statement {
-	// [0] 통화
-	string currency;
-	// [1] 항목코드
-	string statementCode;
-	// [2] 항목명
-	string rowName;
-	// [3] 당기
-	long now = 0;
-	// [4] 전기
-	long y1 = 0;
-	// [5] 전전기
-	long y2 = 0;
-
-	void setMoney(string now, string y1, string y2) {
-		string e1 = strip(now).replace(",", "");
-		string e2 = strip(y1).replace(",", "");
-		string e3 = strip(y2).replace(",", "");
-		this.now = (e1 == "") ? 0:to!long(e1);
-		this.y1 =  (e2 == "") ? 0:to!long(e2);
-		this.y2 =  (e3 == "") ? 0:to!long(e3);
-	}
 }
 
 /// 손익계산서 계정항목
-struct StatementNq {
-    /// [0] 통화
-    string currency;
-    /// [1] 항목코드
-    string statementCode;
-    /// [2] 항목명
-    string rowName;
-    /// [3] 당기 3분기 3개월
-    long now = 0;
-    /// [4] 당기 3분기 누적
-    long nowAcc = 0;
-    /// [5] 전기 3분기 3개월
-    long y1 = 0;
-    /// [6] 전기 3분기 누적
-    long y1Acc = 0;
-    /// [7] 전기
-    long y2 = 0;
-    /// [8] 전전기
-    long y2Acc = 0;
+struct IncomeStatementItem {
+	/// 통화
+	private string _currency;
+	/// 항목코드
+	private string _itemCode;
+	/// 항목명
+	private string _itemName;
+	/// 당기
+	private long _currentTerm = 0;
+	/// 당기누적
+	private long _currentAccumulation = 0;
+	/// 전기말
+	private long _endOfTheFirstPeriod = 0;
+	/// 전기말 누적
+	private long _accumulationAtEndOfTheFirstPeriod = 0;
+	/// 전전기말
+	private long _endOfThePreviousPeriod = 0;
+	/// 전전기말 누적
+	private long _accumulationAtEndOfThePriviousPeriod = 0;
 
-	void setMoney(string now, string nowAcc, string y1, string y1Acc, string y2, string y2Acc) {
-		string n = strip(now).replace(",", "");
-        string na = strip(nowAcc).replace(",", "");
-        this.now    = (n == "")  ? 0:to!long(n);
-        this.nowAcc = (na == "") ? 0:to!long(na);
+	/// 통화
+	@property public string currency() {
+		return this._currency;
+	}
 
-        y1         = strip(y1).replace(",", "");
-        string y1a = strip(y1Acc).replace(",", "");
-        this.y1    = (y1 == "")  ? 0:to!long(y1);
-        this.y1Acc = (y1a == "") ? 0:to!long(y1a);
+	/// 항목코드
+	@property public string itemCode() {
+		return this._itemCode;
+	}
 
-        y2         = strip(y2)   .replace(",", "");
-        string y2a = strip(y2Acc).replace(",", "");
-        this.y2    = (y2 == "")  ? 0:to!long(y2);
-        this.y2Acc = (y2a == "") ? 0:to!long(y2a);
+	/// 항목명
+	@property public string itemName() {
+		return this._itemName;
+	}
+
+	/// 당기
+	@property public long currentTerm() {
+		return this._currentTerm;
+	}
+
+	/// 당기 누적
+	@property public long currentAccumulation() {
+		return this._currentAccumulation;
+	}
+
+	/// 전기말
+	@property public long endOfTheFirstPeriod() {
+		return this._endOfTheFirstPeriod;
+	}
+
+	/// 전기말 누적
+	@property public long accumulationAtEndOfTheFirstPeriod() {
+		return this._accumulationAtEndOfTheFirstPeriod;
+	}
+
+	/// 전전기말
+	@property public long endOfThePreviousPeriod() {
+		return this._endOfThePreviousPeriod;
+	}
+
+	/// 전전기말 뉴적
+	@property public long accumulationAtEndOfThePriviousPeriod() {
+		return this._accumulationAtEndOfThePriviousPeriod;
+	}
+
+	/**
+	 * 생성자
+	 * Params:
+	 *	currency = 통화코드
+	 *	itemCode = 항목코드
+	 *	itemName = 항목명
+	 *	currentTerm = 당기
+	 *	eofp = 전기
+	 *	eopp = 전전기
+	 */
+	this(string currency, string itemCode, string itemName) {
+		this._currency = currency;
+		this._itemCode = itemCode;
+		this._itemName = itemName;
+	}
+
+	/** 
+	 * 당기금액 설정
+	 * Params:
+	 *	currentTerm = 당기
+	 *	currentAccumulation = 당기누적
+	 */
+	public void setCurrentAmount(string currentTerm, string currentAccumulation) {
+		this._currentTerm = amountStringToLong(currentTerm);
+		this._currentAccumulation = amountStringToLong(currentAccumulation);
+	}
+
+	/** 
+	 * 전기금액 설정
+	 * Params:
+	 *	eofp = 전기
+	 *	accEofp = 전기누적
+	 */
+	public void setFirstPeriodAmount(string eofp, string accEofp) {
+		this._endOfTheFirstPeriod = amountStringToLong(eofp);
+		this._accumulationAtEndOfTheFirstPeriod = amountStringToLong(accEofp);
+	}
+
+	/** 
+	 * 전전기금액 설정
+	 * Params:
+	 *	eofp = 전전기
+	 *	accEofp = 전전기누적
+	 */
+	public void setPreviousAmount(string eofp, string accEopp) {
+		this._endOfThePreviousPeriod = amountStringToLong(eofp);
+		this._accumulationAtEndOfThePriviousPeriod= amountStringToLong(accEopp);
 	}
 }
 
@@ -818,9 +872,7 @@ struct FormulaResult {
 		this._code = code;
 	}
 
-	/**
-	 * 비어있는 지 여부
-	 */
+	/// 비어있는 지 여부
 	@property bool empty() {
 		return (_value==0 && _ratio ==0);
 	}
@@ -835,4 +887,10 @@ struct FormulaResult {
 	public bool ratioBetween(float x, float y) {
 		return _ratio >= x && _ratio <= y;
 	}
+}
+
+/// 금액형태의 문자열을 long형태로 변환
+private long amountStringToLong(string numeric) {
+	string cleanedNumeric = strip(numeric).replace(",", "");
+	return cleanedNumeric=="" ? 0:cleanedNumeric.to!long;
 }

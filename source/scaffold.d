@@ -9,10 +9,11 @@ module com.davidjung.spider.scaffold;
  * License: GPL-3.0
  */
 
-import std.stdio;
-import std.datetime;
-import std.math;
 import std.conv;
+import std.datetime;
+import std.format: format;
+import std.math;
+import std.stdio;
 import com.davidjung.spider.parser;
 import com.davidjung.spider.types;
 import com.davidjung.spider.formula;
@@ -164,8 +165,32 @@ struct DefaultRow {
 	ulong marketCap; /// 시가총액
 	ulong listedShares; /// 상장주식수
 	uint closePrice; /// 종가
+	ulong fullAssets; // 자산총계
 	ulong fullCurrentAssets; // 유동자산
 	ulong fullCashAndCashEquivalents; // 현금성자산
+	ulong fullCurrentLiabilities; // 유동부채
+	ulong fullLiabilities; // 총부채
+	long fullProfitloss; // 당기순이익
+	long fullProfitLossBeforeTax; // 법인세차감전순이익
+	long fullProfitLossAttributableToOwnersOfParent; // 지배기업 소유주지분 순이익
+	long operatingIncomeLoss; // 영업이익
+
+	private string columnLayout = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s";
+	private string dataLayout = "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d";
+
+	public string getColumnsLine() {
+		return columnLayout.format(
+			"corpCode", "corpName", "marketCap", "listedShares", "closePrice",
+			"fullAssets", "fullCurrentAssets", "fullCashAndCashEquivalents", "fullCurrentLiabilities","fullLiabilities",
+			"fullProfitloss", "fullProfitLossBeforeTax", "fullProfitLossAttributableToOwnersOfParent", "operatingIncomeLoss");
+	}
+
+	public string getDatasLine() {
+		return dataLayout.format(
+			corpCode, corpName, marketCap, listedShares, closePrice,
+			fullAssets, fullCurrentAssets, fullCashAndCashEquivalents, fullCurrentLiabilities, fullLiabilities,
+			fullProfitloss, fullProfitLossBeforeTax, fullProfitLossAttributableToOwnersOfParent, operatingIncomeLoss);
+	}
 }
 
 class DefaultReport {
@@ -181,10 +206,10 @@ class DefaultReport {
 		Parser incomeSheet = new Parser(year, period, reportType, StatementType.CIS);
 		incomeSheet.read(this.rpt);
 		
-		//this.rpt.filteringOnlyListed();			   // 비상장 종목
-		//this.rpt.filteringNotCapZero();			   // 상장폐지 종목
-		//this.rpt.filteringNotChineseCompany();     // 중국회사 제거
-		//this.rpt.filteringIntersectionCorpCode();  // 재무데이터 있는 종목만 남기기
+		//this.rpt.filteringOnlyListed(); // 비상장 종목
+		//this.rpt.filteringNotCapZero(); // 상장폐지 종목
+		//this.rpt.filteringNotChineseCompany(); // 중국회사 제거
+		//this.rpt.filteringIntersectionCorpCode(); // 재무데이터 있는 종목만 남기기
 	}
 
 	public DefaultRow[] fetch() {
@@ -209,8 +234,17 @@ class DefaultReport {
 			row.closePrice = rpt.getClosePrice(codes[i]); /// 종가
 			
 			Bs balance = rpt.getBalanceStatement(codes[i]);
+			row.fullAssets = balance.getCurrentTerm(IfrsCode.FULL_ASSETS);
 			row.fullCurrentAssets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
-			row.fullCashAndCashEquivalents = balance.getCurrentTerm(IfrsCode.FULL_CASH_AND_CASH_EQUIVALENTS);	
+			row.fullCashAndCashEquivalents = balance.getCurrentTerm(IfrsCode.FULL_CASH_AND_CASH_EQUIVALENTS);
+			row.fullCurrentLiabilities = balance.getCurrentTerm(IfrsCode.FULL_CURRENT_LIABILITIES);
+			row.fullLiabilities = balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
+
+			Cis cis = rpt.getComprehensiveIncomeStatement(codes[i]);
+			row.fullProfitloss = cis.q(IfrsCode.FULL_PROFITLOSS);
+			row.fullProfitLossBeforeTax = cis.q(IfrsCode.FULL_PROFIT_LOSS_BEFORE_TAX);
+			row.fullProfitLossAttributableToOwnersOfParent = cis.q(IfrsCode.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT);
+			row.operatingIncomeLoss = cis.queryDartStatement(DartCode.OPERATING_INCOME_LOSS);
 			rows ~= row;
 		}
 		return rows;

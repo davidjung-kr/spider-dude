@@ -83,7 +83,7 @@ class Report {
                 tempBs[k] = _balance[k];
                 tempBlocks[k] = blocks[k];
                 count ++;
-            } 
+            }
         }
         _balance = tempBs;
         blocks = tempBlocks;
@@ -245,9 +245,13 @@ class Report {
 
     /// 회사명
     public string getCorpName(string code) {
-        if((blocks == null || code !in blocks) && code in _balance)
+        if(code in blocks) {
+            return blocks[code].name;
+        }
+        if(code in _balance) {
             return _balance[code].name;
-        return blocks[code].name;
+        }
+        return "Unknown";
     }
 
     /// 상장여부
@@ -257,6 +261,10 @@ class Report {
         return false;
     }
 
+    /// 마켓구분
+    public string getMarketId(string code) {
+        return blocks[code].mktId;
+    }
     /// 시가총액
     public ulong getMarketCap(string code) {
         return blocks[code].marketCap;

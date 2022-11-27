@@ -17,7 +17,7 @@ import com.davidjung.spider.scaffold;
 void main() {
         writeln("Please load a sample reports from scaffold.d");
         auto report = new DefaultReport(
-                Date(2022, 11, 18),
+                Date(2022, 11, 25),
                 Period.Y3,
                 ReportType.OFS
         );

@@ -160,6 +160,7 @@ class LowPerStocks {
 
 /// 보고서 기본 컬럼목록
 struct DefaultRow {
+	string mktId; /// 시장구분
 	string corpCode; /// 종목코드
 	string corpName; /// 종목명
 	ulong marketCap; /// 시가총액
@@ -174,22 +175,25 @@ struct DefaultRow {
 	long fullProfitLossBeforeTax; // 법인세차감전순이익
 	long fullProfitLossAttributableToOwnersOfParent; // 지배기업 소유주지분 순이익
 	long operatingIncomeLoss; // 영업이익
+	long fullGrossProfit; // 매출총이익
 
-	private string columnLayout = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s";
-	private string dataLayout = "%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d";
+	private string columnLayout = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s";
+	private string dataLayout = "%s\t'%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d";
 
 	public string getColumnsLine() {
 		return columnLayout.format(
-			"corpCode", "corpName", "marketCap", "listedShares", "closePrice",
+			"mktId", "corpCode", "corpName", "marketCap", "listedShares", "closePrice",
 			"fullAssets", "fullCurrentAssets", "fullCashAndCashEquivalents", "fullCurrentLiabilities","fullLiabilities",
-			"fullProfitloss", "fullProfitLossBeforeTax", "fullProfitLossAttributableToOwnersOfParent", "operatingIncomeLoss");
+			"fullProfitloss", "fullProfitLossBeforeTax", "fullProfitLossAttributableToOwnersOfParent", "operatingIncomeLoss",
+			"fullGrossProfit");
 	}
 
 	public string getDatasLine() {
 		return dataLayout.format(
-			corpCode, corpName, marketCap, listedShares, closePrice,
+			mktId, corpCode, corpName, marketCap, listedShares, closePrice,
 			fullAssets, fullCurrentAssets, fullCashAndCashEquivalents, fullCurrentLiabilities, fullLiabilities,
-			fullProfitloss, fullProfitLossBeforeTax, fullProfitLossAttributableToOwnersOfParent, operatingIncomeLoss);
+			fullProfitloss, fullProfitLossBeforeTax, fullProfitLossAttributableToOwnersOfParent, operatingIncomeLoss,
+			fullGrossProfit);
 	}
 }
 
@@ -228,6 +232,7 @@ class DefaultReport {
 
 			DefaultRow row = DefaultRow();
 			row.corpCode = code;
+			row.mktId = rpt.getMarketId(codes[i]); /// 시장구분
 			row.corpName = rpt.getCorpName(codes[i]); /// 종목명
 			row.marketCap = rpt.getMarketCap(codes[i]); /// 시가총액
 			row.listedShares = rpt.getListShared(codes[i]); /// 상장주식수
@@ -245,6 +250,7 @@ class DefaultReport {
 			row.fullProfitLossBeforeTax = cis.q(IfrsCode.FULL_PROFIT_LOSS_BEFORE_TAX);
 			row.fullProfitLossAttributableToOwnersOfParent = cis.q(IfrsCode.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT);
 			row.operatingIncomeLoss = cis.queryDartStatement(DartCode.OPERATING_INCOME_LOSS);
+			row.fullGrossProfit = cis.q(IfrsCode.FULL_GROSSPROFIT);
 			rows ~= row;
 		}
 		return rows;

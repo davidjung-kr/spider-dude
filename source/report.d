@@ -193,8 +193,7 @@ class Report {
             tempBlocks[code] = blocks[code];
             count++;
         }
-        import std.stdio;
-
+        
         if(type == StatementType.CIS) {
             _cIncome = tempIs;
         }

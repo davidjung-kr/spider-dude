@@ -166,7 +166,7 @@ struct DefaultRow {
 	ulong marketCap; /// 시가총액
 	ulong listedShares; /// 상장주식수
 	uint closePrice; /// 종가
-	ulong fullAssets; // 자산총계
+	ulong fullAssets; // 자산총계	
 	ulong fullCurrentAssets; // 유동자산
 	ulong fullCashAndCashEquivalents; // 현금성자산
 	ulong fullCurrentLiabilities; // 유동부채
@@ -176,9 +176,9 @@ struct DefaultRow {
 	long fullProfitLossAttributableToOwnersOfParent; // 지배기업 소유주지분 순이익
 	long operatingIncomeLoss; // 영업이익
 	long fullGrossProfit; // 매출총이익
-
-	private string columnLayout = "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s";
-	private string dataLayout = "%s\t'%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d";
+	
+	private string columnLayout = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s";
+	private string dataLayout = "%s,'%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d";
 
 	public string getColumnsLine() {
 		return columnLayout.format(
@@ -199,16 +199,17 @@ struct DefaultRow {
 
 class DefaultReport {
 	private Report rpt;
-	this(Date ymd, Period period, ReportType reportType) {
+	this(Date ymd, string rptYear, Period period, ReportType reportType) {
 		this.rpt = new Report();
 		Downloader krxClient = new Downloader();
 		krxClient.readKrxCapAllByBlock(ymd, this.rpt);
 
-		string year = ymd.year.to!string;
-		Parser balacneSheet = new Parser(year, period, reportType, StatementType.BS);
+		Parser balacneSheet = new Parser(rptYear, period, reportType, StatementType.BS);
 		balacneSheet.read(this.rpt);
-		Parser incomeSheet = new Parser(year, period, reportType, StatementType.CIS);
+		Parser incomeSheet = new Parser(rptYear, period, reportType, StatementType.CIS);
 		incomeSheet.read(this.rpt);
+
+		this.rpt.filteringIntersectionCorpCode();
 		
 		//this.rpt.filteringOnlyListed(); // 비상장 종목
 		//this.rpt.filteringNotCapZero(); // 상장폐지 종목

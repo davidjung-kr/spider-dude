@@ -174,9 +174,16 @@ class Parser {
 				cell[10], // 항목코드
 				cell[11] // 항목명
 			);
-			item.setCurrentAmount(    cell[12], this._period == Period.Y4 ? cell[12]:cell[13]); // 당기
-			item.setFirstPeriodAmount(cell[14], this._period == Period.Y4 ? cell[14]:cell[15]); // 전기
-			item.setFirstPeriodAmount(cell[16], this._period == Period.Y4 ? cell[16]:cell[17]); // 전전기
+
+			if(this._period == Period.Y4) {
+				item.setCurrentAmount(cell[13], cell[13]); // 당기
+				item.setFirstPeriodAmount(cell[16], cell[16]); // 전기
+				item.setPreviousAmount(cell[17], cell[17]); // 전전기
+			} else {
+				item.setCurrentAmount(cell[12], cell[13]); // 당기
+				item.setFirstPeriodAmount(cell[14], cell[15]); // 전기
+				item.setPreviousAmount(cell[16], cell[17]); // 전전기
+			}
 			comprehensiveIncomeSheet[code].items ~= item;
 		}
 		f.close();

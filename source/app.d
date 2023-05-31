@@ -11,25 +11,26 @@ module com.davidjung.spider.app;
 
 import std.stdio;
 import com.davidjung.spider.database;
-// import std.datetime;
-// import com.davidjung.spider.types;
-// import com.davidjung.spider.scaffold;
+import std.datetime;
+import com.davidjung.spider.types;
+import com.davidjung.spider.scaffold;
 
 void main() {
 
-        // writeln("Please load a sample reports from scaffold.d");
-        // auto report = new DefaultReport(
-        //         Date(2023, 02, 20),
-        //         "2022",
-        //         Period.Y3,
-        //         ReportType.OFS
-        // );
+        writeln("Please load a sample reports from scaffold.d");
+        auto report = new DefaultReport(
+                Date(2023, 5, 26),
+                "2023",
+                Period.Y1,
+                ReportType.OFS
+        );
 
-        // File f = File("default_report.csv", "w");
-        // DefaultRow[] rows = report.fetch();
-        // f.writeln(rows[0].getColumnsLine());
-        // foreach(DefaultRow row; rows) {
-        //         f.writeln(row.getDatasLine());
-        // }
-        // f.close();
+        File f = File("default_report.csv", "w");
+        DefaultRow[] rows = report.fetch();
+        f.writeln(rows[0].getColumnsLine());
+        // f.writeln(rows[0].getUnicodeLIne());
+        foreach(DefaultRow row; rows) {
+                f.writeln(row.getDatasLine());
+        }
+        f.close();
 }

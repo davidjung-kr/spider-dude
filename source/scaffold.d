@@ -177,20 +177,37 @@ struct DefaultRow {
 	long operatingIncomeLoss; // 영업이익
 	long fullGrossProfit; // 매출총이익
 	
-	private string columnLayout = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s";
-	private string dataLayout = "%s,'%s,%s,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d";
+	// private string columnLayout = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s";
+	// private string dataLayout = "%s;'%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d";
+	private string columnLayout = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s";
+	private string dataLayout = "%s;'%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d";
+
 
 	public string getColumnsLine() {
-		return columnLayout.format(
-			"mktId", "corpCode", "corpName", "marketCap", "listedShares", "closePrice",
+			return columnLayout.format(
+			"mktId", "corpCode", "marketCap", "listedShares", "closePrice",
 			"fullAssets", "fullCurrentAssets", "fullCashAndCashEquivalents", "fullCurrentLiabilities","fullLiabilities",
 			"fullProfitloss", "fullProfitLossBeforeTax", "fullProfitLossAttributableToOwnersOfParent", "operatingIncomeLoss",
 			"fullGrossProfit");
+
+		// return columnLayout.format(
+		// 	"mktId", "corpCode", "corpName", "marketCap", "listedShares", "closePrice",
+		// 	"fullAssets", "fullCurrentAssets", "fullCashAndCashEquivalents", "fullCurrentLiabilities","fullLiabilities",
+		// 	"fullProfitloss", "fullProfitLossBeforeTax", "fullProfitLossAttributableToOwnersOfParent", "operatingIncomeLoss",
+		// 	"fullGrossProfit");
+	}
+
+	public string getUnicodeLIne() {
+		return mktId~","~corpCode~","~corpName~","~to!string(marketCap)~","~to!string(listedShares)~","~to!string(closePrice)~","~
+			to!string(fullAssets)~","~to!string(fullCurrentAssets)~","~to!string(fullCashAndCashEquivalents)~","~
+			to!string(fullCurrentLiabilities)~","~to!string(fullLiabilities)~","~to!string(fullProfitloss)~","~
+			to!string(fullProfitLossBeforeTax)~","~to!string(fullProfitLossAttributableToOwnersOfParent)~","~
+			to!string(operatingIncomeLoss)~","~to!string(fullGrossProfit);
 	}
 
 	public string getDatasLine() {
 		return dataLayout.format(
-			mktId, corpCode, corpName, marketCap, listedShares, closePrice,
+			mktId, corpCode, marketCap, listedShares, closePrice,
 			fullAssets, fullCurrentAssets, fullCashAndCashEquivalents, fullCurrentLiabilities, fullLiabilities,
 			fullProfitloss, fullProfitLossBeforeTax, fullProfitLossAttributableToOwnersOfParent, operatingIncomeLoss,
 			fullGrossProfit);

@@ -1,10 +1,11 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"asdf": "0.7.13",
-		"mir-algorithm": "3.12.19",
-		"mir-core": "1.1.103",
-		"mysql-native": "3.2.2",
+		"asdf": "0.7.17",
+		"mir-algorithm": "3.20.4",
+		"mir-core": "1.5.5",
+		"mysql-native": "3.2.4",
+		"silly": "1.1.1",
 		"taggedalgebraic": "0.11.22"
 	}
 }

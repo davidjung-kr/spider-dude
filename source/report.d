@@ -213,7 +213,12 @@ class Report {
         return false;
     }
 
-    /// 재무상태표
+    /// 재무상태표 전부 취득
+    public Bs[string] getBalanceStatementAll() {
+        return _balance;
+    }
+
+    /// 종목코드로 재무상태표 취득
     public Bs getBalanceStatement(string code) {
         return _balance[code];
     }

@@ -87,13 +87,13 @@ enum DartCode {
 /// N분기
 enum Period {
     /// 1Q:1분기 보고서
-    Y1,
+    Q1,
     /// 2Q:반기 보고서
-    Y2,
+    Q2,
     /// 3Q:3분기 보고서
-    Y3,
+    Q3,
     /// 4Q:사업보고서
-    Y4
+    Q4
 }
 
 /// 공식명
@@ -468,10 +468,10 @@ struct GetCodeFrom {
 
     public static string period(Period e) @safe {
         switch(e) {
-        case Period.Y1: return "1Q";
-        case Period.Y2: return "2Q";
-        case Period.Y3: return "3Q";
-        case Period.Y4: return "4Q";
+        case Period.Q1: return "1Q";
+        case Period.Q2: return "2Q";
+        case Period.Q3: return "3Q";
+        case Period.Q4: return "4Q";
         default: return "";
         }
     }

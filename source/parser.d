@@ -132,9 +132,9 @@ class Parser {
 				cell[10], // 항목코드
 				cell[11] // 항목명
 			);
-			item.setCurrentAmount(    cell[12], this._period == Period.Y4 ? cell[12]:cell[13]); // 당기
-			item.setFirstPeriodAmount(cell[14], this._period == Period.Y4 ? cell[14]:cell[15]); // 전기
-			item.setFirstPeriodAmount(cell[16], this._period == Period.Y4 ? cell[16]:cell[17]); // 전전기
+			item.setCurrentAmount(    cell[12], this._period == Period.Q4 ? cell[12]:cell[13]); // 당기
+			item.setFirstPeriodAmount(cell[14], this._period == Period.Q4 ? cell[14]:cell[15]); // 전기
+			item.setFirstPeriodAmount(cell[16], this._period == Period.Q4 ? cell[16]:cell[17]); // 전전기
 			incomeSheet[code].items ~= item;
 		}
 		f.close();
@@ -175,7 +175,7 @@ class Parser {
 				cell[11] // 항목명
 			);
 
-			if(this._period == Period.Y4) {
+			if(this._period == Period.Q4) {
 				item.setCurrentAmount(cell[13], cell[13]); // 당기
 				item.setFirstPeriodAmount(cell[16], cell[16]); // 전기
 				item.setPreviousAmount(cell[17], cell[17]); // 전전기

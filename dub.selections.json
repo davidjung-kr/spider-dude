@@ -2,10 +2,16 @@
 	"fileVersion": 1,
 	"versions": {
 		"asdf": "0.7.17",
+		"d-unit": "0.10.2",
+		"ddbc": "0.5.7",
+		"derelict-pq": "2.2.0",
+		"derelict-util": "2.0.6",
 		"mir-algorithm": "3.20.4",
 		"mir-core": "1.5.5",
 		"mysql-native": "3.2.4",
+		"odbc": "1.0.0",
 		"silly": "1.1.1",
-		"taggedalgebraic": "0.11.22"
+		"taggedalgebraic": "0.11.22",
+		"undead": "1.1.8"
 	}
 }

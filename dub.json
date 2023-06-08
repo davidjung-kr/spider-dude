@@ -5,7 +5,7 @@
 	"copyright": "Copyright © 2022, David Jung",
 	"dependencies": {
 		"asdf": "~>0.7.17",
-		"mysql-native": "~>3.2.2"
+		"ddbc": "~>0.5.7"
 	},
 	"description": "Self-made net-net & value stocks screener for KRX 📈",
 	"dflags-ldc": [

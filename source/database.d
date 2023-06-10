@@ -11,7 +11,7 @@ module com.davidjung.spider.database;
 
 import std.format;
 import std.conv:to;
-import std.datetime: Date, Clock;
+import std.datetime: Date, Clock, SysTime;
 import std.file:exists, remove, isFile;
 import ddbc;
 import com.davidjung.spider.parser;
@@ -19,10 +19,106 @@ import com.davidjung.spider.report;
 import com.davidjung.spider.types;
 import com.davidjung.spider.downloader;
 
+/** 한국거래소 가격데이터 행 */
+struct RowKrx {
+    /** 기준년월일 */
+    string baseYmd;
+    /** 시장구분 */
+    string mktId;
+    /** 종목코드 */
+    string corpCd;
+    /** 종목명 */
+    string corpNm;
+    /** 시가총액 */
+    ulong marketCap;
+    /** 상장주식수 */
+    ulong shares;
+    /** 종가 */
+    uint close;
+    /** 처리년월일 */
+    string dumpYms = "";
+    
+    this(SysTime sysdate) {
+        this.dumpYms = sysdate.toISOString();
+    }
+
+    /** 
+     * 행 문자열 취득
+     *  baseYmd = 기준년월일
+     *  mktId = 시장구분
+     *  corpCd = 종목코드
+     *  corpNm = 종목명
+     *  marketCap = 시가총액
+     *  shares = 상장주식수
+     *  close = 종가
+     */
+    public string str() {
+        return format("'%s', '%s', '%s', '%s', %d, %d, %d, '%s'",
+            baseYmd, mktId, corpCd, corpNm, marketCap, shares, close, dumpYms);
+    }
+}
+
+
+/** 포괄손익계산서 행 */
+struct RowCis {
+    /** 사업연도 */
+    string baseYear;
+    /** 보고서 분기 */
+    string basePeriod;
+    /** 보고서 유형 (연결/개별) */
+    string reportType;
+    /** 종목코드 */
+    string corpCd;
+    /** 당기순이익 */
+    long fullProfitloss;
+    /** 법인세차감전순이익 */
+	long fullProfitLossBeforeTax;
+    /** 지배기업 소유주지분 순이익 */
+	long fullProfitLossAttributableToOwnersOfParent;
+    /** 영업이익 */
+	long operatingIncomeLoss;
+    /** 매출총이익 */
+	long fullGrossProfit;
+    /** 처리년월일 */
+    string dumpYms = "";
+    
+    this(SysTime sysdate) {
+        this.dumpYms = sysdate.toISOString();
+    }
+
+    /** 
+     * 행 문자열 취득
+     *  baseYear = 사업연도
+     *  basePeriod = 보고서 분기
+     *  reportType = 보고서 유형 (연결/개별)
+     *  corpCd = 종목코드
+     *  fullProfitloss = 당기순이익
+     *  fullProfitLossBeforeTax = 법인세차감전순이익
+     *  fullProfitLossAttributableToOwnersOfParent = 지배기업 소유주지분 순이익
+     *  operatingIncomeLoss = 영업이익
+     *  fullGrossProfit = 매출총이익
+     *  dumpYms = 처리년월일
+     */
+    public string str() {
+        return format("'%s', '%s', '%s', '%s', %d, %d, %d, %d, %d, '%s'",
+            baseYear, basePeriod, reportType, corpCd,
+            fullProfitloss, fullProfitLossBeforeTax, fullProfitLossAttributableToOwnersOfParent,
+            operatingIncomeLoss, fullGrossProfit,
+            dumpYms);
+    }
+}
+
+
+
+
 class DataDump {
+    /** DB file path */
     private string pathName;
+    /** DB connect url */
     private string connectUrl;
+    /** DB session */
     private Connection con;
+
     this(string pathName) {
         this.pathName = pathName;
         this.connectUrl =  format("sqlite:%s", this.pathName);
@@ -38,6 +134,7 @@ class DataDump {
 
         createNewKrxTable();
         createNewBalanceStatementTable();
+        createNewComprehensiveIncomeStatementTable();
     }
 
     /** 한국거래소 가격테이블 생성 */
@@ -57,7 +154,6 @@ class DataDump {
         )`);
     }
 
-    
     /** 재무제표 테이블 생성 */
     private void createNewBalanceStatementTable() {
         Statement tx = con.createStatement();
@@ -79,31 +175,32 @@ class DataDump {
         )`);
     }
 
-    /**
-     * 한국거래소 가격데이터 추가
-     * Params:
-     *  baseYmd = 기준일
-     *  mktId = 시장구분
-     *  corpCd = 종목코드
-     *  corpNm = 종목명
-     *  cap = 시가총액
-     *  shares = 상장주식수
-     *  close = 종가
-     */
-    protected void insertKrxTable(string baseYmd, string mktId, string corpCd, string corpNm, ulong cap, ulong shares, uint close) {
-        auto sysdate = Clock.currTime();
+    /** 포괄손익계산서 테이블 생성 */
+    private void createNewComprehensiveIncomeStatementTable() {
         Statement tx = con.createStatement();
-        tx.executeUpdate(format(`INSERT INTO krx VALUES(
-              '%s' -- baseYmd
-            , '%s' -- mktId
-            , '%s' -- corpCd
-            , '%s' -- corpNm
-            , %d   -- cap
-            , %d   -- shares
-            , %d   -- close
-            , '%s' -- dumpYms
-        )`, baseYmd, mktId, corpCd, corpNm, cap, shares, close, sysdate.toISOString()
-        ));
+        tx.executeUpdate(`CREATE TABLE cis (
+              baseYear CHAR(4) NOT NULL
+            , basePeriod CHAR(2) NOT NULL
+            , reportType CHAR(3) NOT NULL
+            , corpCd CHAR(6) NOT NULL
+
+            , fullProfitloss INT NOT NULL DEFAULT 0
+            , fullProfitLossBeforeTax INT NOT NULL DEFAULT 0
+            , fullProfitLossAttributableToOwnersOfParent INT NOT NULL DEFAULT 0
+            , operatingIncomeLoss INT NOT NULL DEFAULT 0
+            , fullGrossProfit INT NOT NULL DEFAULT 0
+
+            , dumpYms DATETIME NOT NULL
+
+            , PRIMARY KEY (baseYear, basePeriod, reportType, corpCd)
+        )`);
+    }
+
+    /** 한국거래소 가격데이터 추가 */
+    private void insertKrxTable(RowKrx row) {
+        Statement tx = con.createStatement();
+        tx.executeUpdate(
+            format(`INSERT INTO krx VALUES(%s)`, row.str() ));
     }
 
     /**
@@ -119,7 +216,7 @@ class DataDump {
      *  fullLiabilities = 총부채
      *  fullCurrentLiabilities = 유동부채
      */
-    protected void insertBalanceStatementTable(int baseYear, string basePeriod, string reportType, string corpCd,
+    private void insertBalanceStatementTable(int baseYear, string basePeriod, string reportType, string corpCd,
         ulong fullAssets, ulong fullCurrentAssets, ulong fullCashAndCashEquivalents,
         ulong fullLiabilities, ulong fullCurrentLiabilities) {
 
@@ -154,25 +251,32 @@ class DataDump {
         ));
     }
 
+    /** 포괄손익계산서 데이터 추가 */
+    private void insertComprehensiveIncomeStatementTable(RowCis row) {
+        Statement tx = con.createStatement();
+        tx.executeUpdate(format(`INSERT INTO cis VALUES(%s)`, row.str() ));
+    }
+
+
     /** 한국거래소 가격데이터 로드 */
-    private void loadKrxData(Date baseYmd) {
+    protected void loadKrxData(Date baseYmd) {
         Downloader krx = new Downloader();
         OutBlock[string] krxPriceData = krx.getKrxCapAllByBlock(baseYmd);
-
         foreach(string corpCd ; krxPriceData.keys) {
-            insertKrxTable(toYmd(baseYmd)
-                , krxPriceData[corpCd].mktId
-                , corpCd
-                , krxPriceData[corpCd].name
-                , krxPriceData[corpCd].marketCap
-                , krxPriceData[corpCd].listShared
-                , krxPriceData[corpCd].closePrice
-            );
+            RowKrx row = RowKrx(Clock.currTime());
+            row.baseYmd = toYmd(baseYmd);
+            row.corpCd = corpCd;
+            row.mktId = krxPriceData[corpCd].mktId;
+            row.corpNm = krxPriceData[corpCd].name;
+            row.marketCap = krxPriceData[corpCd].marketCap;
+            row.shares = krxPriceData[corpCd].listShared;
+            row.close = krxPriceData[corpCd].closePrice;
+            insertKrxTable(row);
         }
     }
 
     /** 재무제표 데이터 로드 */
-    private void loadBalanceStatementData(int baseYear, Period period, ReportType type) {
+    protected void loadBalanceStatementData(int baseYear, Period period, ReportType type) {
         Report bs = new Report();
 		Parser sheet = new Parser(baseYear.to!string, period, type, StatementType.BS);
 		sheet.read(bs);
@@ -191,6 +295,27 @@ class DataDump {
             );
         }
     }
+
+    /** 포괄손익계산서 데이터 로드 */
+    protected void loadComprehensiveIncomeStatementData(int baseYear, Period period, ReportType type) {
+        Report cis = new Report();
+		Parser sheet = new Parser(baseYear.to!string, period, type, StatementType.CIS);
+		sheet.read(cis);
+        Cis[string] csData = cis.getComprehensiveIncomeStatementAll();
+        foreach(string corpCd ; csData.keys) {
+            RowCis row = RowCis(Clock.currTime());
+            row.baseYear = baseYear.to!string;
+            row.basePeriod = GetCodeFrom.period(period);
+            row.reportType = GetCodeFrom.reportType(type);
+            row.corpCd = corpCd;
+            row.fullProfitloss = csData[corpCd].getCurrentTerm(GetCodeFrom.ifrsCode(IfrsCode.FULL_PROFITLOSS));
+            row.fullProfitLossBeforeTax = csData[corpCd].getCurrentTerm(GetCodeFrom.ifrsCode(IfrsCode.FULL_PROFIT_LOSS_BEFORE_TAX));
+            row.fullProfitLossAttributableToOwnersOfParent = csData[corpCd].getCurrentTerm(GetCodeFrom.ifrsCode(IfrsCode.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT));
+            row.operatingIncomeLoss = csData[corpCd].getCurrentTerm(GetCodeFrom.dartCode(DartCode.OPERATING_INCOME_LOSS));
+            row.fullGrossProfit = csData[corpCd].getCurrentTerm(GetCodeFrom.ifrsCode(IfrsCode.FULL_GROSSPROFIT));
+            insertComprehensiveIncomeStatementTable(row);
+        }
+    }
 }
 
 string toYmd(Date dt) {
@@ -201,6 +326,7 @@ unittest {
     DataDump client = new DataDump("unittest.sqlite");
     client.loadKrxData(Date(2023, 6, 8));
     client.loadBalanceStatementData(2023, Period.Q1, ReportType.CFS);
+    client.loadComprehensiveIncomeStatementData(2023, Period.Q1, ReportType.CFS);
 }
 
 // 유틸리티 클래스

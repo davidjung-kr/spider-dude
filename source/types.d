@@ -627,6 +627,16 @@ struct Cis {
 	/// 계정항목들
 	IncomeStatementItem[] items;
 
+	/// 당기 금액 질의
+	ulong getCurrentTerm(string ifrsCode) {
+		for(int i=0; i<this.items.length; i++) {
+			if(this.items[i].itemCode == ifrsCode) {
+				return this.items[i].currentTerm;
+			}
+		}
+		return 0;
+	}
+
 	/// 재무제표 질의: 당기 누적을 기본으로 가져옴
 	long q(IfrsCode ifrsCode) {
 		import std.stdio;

@@ -230,7 +230,12 @@ class Report {
         return false;
     }
 
-    /// 포괄손익계산서
+    /// 포괄손익계산서 전부 취득
+    public Cis[string] getComprehensiveIncomeStatementAll() {
+        return _cIncome;
+    }
+
+    /// 종목코드로 포괄손익계산서 취득
     public Cis getComprehensiveIncomeStatement(string code) {
         return _cIncome[code];
     }

@@ -324,9 +324,21 @@ string toYmd(Date dt) {
 
 unittest {
     DataDump client = new DataDump("unittest.sqlite");
-    client.loadKrxData(Date(2023, 6, 8));
+    client.loadKrxData(Date(2023, 6, 13));
+    
+    client.loadBalanceStatementData(2022, Period.Q1, ReportType.CFS);
+    client.loadBalanceStatementData(2022, Period.Q1, ReportType.OFS);
+    client.loadComprehensiveIncomeStatementData(2022, Period.Q1, ReportType.CFS);
+    client.loadComprehensiveIncomeStatementData(2022, Period.Q1, ReportType.OFS);
+    client.loadBalanceStatementData(2022, Period.Q4, ReportType.CFS);
+    client.loadBalanceStatementData(2022, Period.Q4, ReportType.OFS);
+    client.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.CFS);
+    client.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.OFS);
+
     client.loadBalanceStatementData(2023, Period.Q1, ReportType.CFS);
+    client.loadBalanceStatementData(2023, Period.Q1, ReportType.OFS);
     client.loadComprehensiveIncomeStatementData(2023, Period.Q1, ReportType.CFS);
+    client.loadComprehensiveIncomeStatementData(2023, Period.Q1, ReportType.OFS);
 }
 
 // 유틸리티 클래스

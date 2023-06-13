@@ -628,7 +628,7 @@ struct Cis {
 	IncomeStatementItem[] items;
 
 	/// 당기 금액 질의
-	ulong getCurrentTerm(string ifrsCode) {
+	long getCurrentTerm(string ifrsCode) {
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == ifrsCode) {
 				return this.items[i].currentTerm;

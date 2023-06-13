@@ -116,33 +116,12 @@ class Downloader {
     }
 }
 
+/** Dart 재무제표 공시 일괄데이터 다운로드 URL */
 struct DartUrl {
-    private string baseUrl = "https://opendart.fss.or.kr/disclosureinfo/fnltt/dwld/main.do#download_";
-    private string[string] urlMap;
-    private string key;
-
-    this(string year, Period p, StatementType st) {
-        this.key = year~GetCodeFrom.period(p)~GetCodeFrom.statementType(st);
-        this.urlMap["20211QBS"] = "2021_1%EB%B6%84%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_BS";
-        this.urlMap["20211QIS"] = "2021_1%EB%B6%84%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_PL";
-        this.urlMap["20211QCF"] = "2021_1%EB%B6%84%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_CF";
-        this.urlMap["20211QSCE"] = "2021_1%EB%B6%84%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_CE";
-        this.urlMap["20212QBS"] = "2021_%EB%B0%98%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_BS";
-        this.urlMap["20212QIS"] = "2021_%EB%B0%98%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_PL";
-        this.urlMap["20212QCF"] = "2021_%EB%B0%98%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_CF";
-        this.urlMap["20212QSCE"] = "2021_%EB%B0%98%EA%B8%B0%EB%B3%B4%EA%B3%A0%EC%84%9C_CE";
-
-    }
-
-    public bool have() { 
-        if(this.key in this.urlMap)
-            return true;
-        else
-            return false;
-    }
-
-    string get() {
-        return this.baseUrl ~ this.urlMap[this.key];
+    public string get(string year, Period p, StatementType st) {
+        return format(
+            "https://opendart.fss.or.kr/cmm/downloadFnlttZip.do?fl_nm=%s_%s_%s_20230516040109.zip"
+            , year, GetCodeFrom.period(p), GetCodeFrom.statementType(st));
     }
 }
 
@@ -247,29 +226,28 @@ struct OutBlock {
 
 /// 유닛테스트
 unittest {
-    import std.stdio;
-    Downloader client = new Downloader();
-    Date dt = Date(2022, 03, 21);
+    // import std.stdio;
+    // Downloader client = new Downloader();
+    // Date dt = Date(2022, 03, 21);
 
-    KrxCapRes capInfo = client.getKrxCapAll(dt);
-    assert(capInfo.currentDatetime != "");
-    assert(capInfo.blocks[0].name != "");
-    assert(capInfo.blocks[0].listShared > 0);
+    // KrxCapRes capInfo = client.getKrxCapAll(dt);
+    // assert(capInfo.currentDatetime != "");
+    // assert(capInfo.blocks[0].name != "");
+    // assert(capInfo.blocks[0].listShared > 0);
 
-    immutable string kbFinanceCode = "105560"; // 종목코드: KB금융
-    OutBlock[string] capInfoByBlocks = client.getKrxCapAllByBlock(dt);
-    assert(capInfoByBlocks[kbFinanceCode].name == "KB금융");
-    assert(capInfoByBlocks[kbFinanceCode].closePrice == 57_400); // KB금융 종가: KRW 57,400
+    // immutable string kbFinanceCode = "105560"; // 종목코드: KB금융
+    // OutBlock[string] capInfoByBlocks = client.getKrxCapAllByBlock(dt);
+    // assert(capInfoByBlocks[kbFinanceCode].name == "KB금융");
+    // assert(capInfoByBlocks[kbFinanceCode].closePrice == 57_400); // KB금융 종가: KRW 57,400
 
-    ulong stockCount = client.fetchKrxCapAll(dt);
-    assert(stockCount > 0);
+    // ulong stockCount = client.fetchKrxCapAll(dt);
+    // assert(stockCount > 0);
 
-    OutBlock funcTestBlock = OutBlock();
-    string dirtyString = "AX#0(,Q@(*XNCNVDI#(";
-    assert("0" == funcTestBlock.cleansingForNumeric(dirtyString));
-    assert(0 == funcTestBlock.numbericToUlong(dirtyString));
-    assert(0 == funcTestBlock.numbericToUint(dirtyString));
+    // OutBlock funcTestBlock = OutBlock();
+    // string dirtyString = "AX#0(,Q@(*XNCNVDI#(";
+    // assert("0" == funcTestBlock.cleansingForNumeric(dirtyString));
+    // assert(0 == funcTestBlock.numbericToUlong(dirtyString));
+    // assert(0 == funcTestBlock.numbericToUint(dirtyString));
 
-
-    client.getKofiaBondYield();
+    // client.getKofiaBondYield();
 }

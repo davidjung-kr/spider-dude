@@ -21,7 +21,7 @@ void main() {
         auto report = new DefaultReport(
                 Date(2023, 5, 26),
                 "2023",
-                Period.Y1,
+                Period.Q1,
                 ReportType.OFS
         );
 

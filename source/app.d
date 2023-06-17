@@ -11,26 +11,14 @@ module com.davidjung.spider.app;
 
 import std.stdio;
 import com.davidjung.spider.database;
-import std.datetime;
 import com.davidjung.spider.types;
 import com.davidjung.spider.scaffold;
 
 void main() {
-
-        writeln("Please load a sample reports from scaffold.d");
-        auto report = new DefaultReport(
-                Date(2023, 5, 26),
-                "2023",
-                Period.Q1,
-                ReportType.OFS
-        );
-
-        File f = File("default_report.csv", "w");
-        DefaultRow[] rows = report.fetch();
-        f.writeln(rows[0].getColumnsLine());
-        // f.writeln(rows[0].getUnicodeLIne());
-        foreach(DefaultRow row; rows) {
-                f.writeln(row.getDatasLine());
-        }
-        f.close();
+        DataDump db = new DataDump("data.sqlite");
+        db.loadKrxData(LastBusinessDay.Y2022);        
+        db.loadBalanceStatementData(2022, Period.Q4, ReportType.CFS);
+        db.loadBalanceStatementData(2022, Period.Q4, ReportType.OFS);
+        db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.CFS);
+        db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.OFS);
 }

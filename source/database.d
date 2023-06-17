@@ -11,6 +11,7 @@ module com.davidjung.spider.database;
 
 import std.format;
 import std.conv:to;
+import std.stdio:writef;
 import std.datetime: Date, Clock, SysTime;
 import std.file:exists, remove, isFile;
 import ddbc;
@@ -256,12 +257,24 @@ class DataDump {
         Statement tx = con.createStatement();
         tx.executeUpdate(format(`INSERT INTO cis VALUES(%s)`, row.str() ));
     }
+    
+    private void beginTran() {
+        Statement tx = con.createStatement();
+        tx.executeUpdate("BEGIN TRANSACTION");
+    }
 
+    private void endTran() {
+        Statement tx = con.createStatement();
+        tx.executeUpdate("END TRANSACTION");
+    }
 
     /** 한국거래소 가격데이터 로드 */
-    protected void loadKrxData(Date baseYmd) {
+    public void loadKrxData(Date baseYmd) {
+        auto stDt = Clock.currTime();
         Downloader krx = new Downloader();
         OutBlock[string] krxPriceData = krx.getKrxCapAllByBlock(baseYmd);
+        auto getDt = Clock.currTime();
+        beginTran();
         foreach(string corpCd ; krxPriceData.keys) {
             RowKrx row = RowKrx(Clock.currTime());
             row.baseYmd = toYmd(baseYmd);
@@ -273,14 +286,25 @@ class DataDump {
             row.close = krxPriceData[corpCd].closePrice;
             insertKrxTable(row);
         }
+        endTran();
+        auto edDt = Clock.currTime();
+        debug  {
+            writef("loadKrxData :: [%s] Start\n",
+                stDt.toSimpleString());
+            writef("loadKrxData :: [%s] KRX get (%s sec)\n",
+                getDt.toSimpleString(), (getDt - stDt));
+            writef("loadKrxData :: [%s] End (%s sec)\n",
+                edDt.toSimpleString(), (edDt - getDt));
+        }
     }
 
     /** 재무제표 데이터 로드 */
-    protected void loadBalanceStatementData(int baseYear, Period period, ReportType type) {
+    public void loadBalanceStatementData(int baseYear, Period period, ReportType type) {
         Report bs = new Report();
 		Parser sheet = new Parser(baseYear.to!string, period, type, StatementType.BS);
 		sheet.read(bs);
         Bs[string] bsData = bs.getBalanceStatementAll();
+        beginTran();
         foreach(string corpCd ; bsData.keys) {
             insertBalanceStatementTable(baseYear
                 , GetCodeFrom.period(period)
@@ -294,14 +318,16 @@ class DataDump {
                 , bsData[corpCd].getCurrentTerm(IfrsCode.FULL_CURRENT_LIABILITIES)
             );
         }
+        endTran();
     }
 
     /** 포괄손익계산서 데이터 로드 */
-    protected void loadComprehensiveIncomeStatementData(int baseYear, Period period, ReportType type) {
+    public void loadComprehensiveIncomeStatementData(int baseYear, Period period, ReportType type) {
         Report cis = new Report();
 		Parser sheet = new Parser(baseYear.to!string, period, type, StatementType.CIS);
 		sheet.read(cis);
         Cis[string] csData = cis.getComprehensiveIncomeStatementAll();
+        beginTran();
         foreach(string corpCd ; csData.keys) {
             RowCis row = RowCis(Clock.currTime());
             row.baseYear = baseYear.to!string;
@@ -315,6 +341,7 @@ class DataDump {
             row.fullGrossProfit = csData[corpCd].getCurrentTerm(GetCodeFrom.ifrsCode(IfrsCode.FULL_GROSSPROFIT));
             insertComprehensiveIncomeStatementTable(row);
         }
+        endTran();
     }
 }
 
@@ -324,7 +351,7 @@ string toYmd(Date dt) {
 
 unittest {
     DataDump client = new DataDump("unittest.sqlite");
-    client.loadKrxData(Date(2023, 6, 13));
+    client.loadKrxData(Date(2023, 6, 16));
     
     client.loadBalanceStatementData(2022, Period.Q1, ReportType.CFS);
     client.loadBalanceStatementData(2022, Period.Q1, ReportType.OFS);

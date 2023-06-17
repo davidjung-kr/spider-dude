@@ -11,6 +11,7 @@ module com.davidjung.spider.types;
 
 import std.conv;
 import std.string;
+import std.datetime;
 import std.math.rounding;
 
 /// 연결/개별 여부
@@ -903,4 +904,15 @@ struct FormulaResult {
 private long amountStringToLong(string numeric) {
 	string cleanedNumeric = strip(numeric).replace(",", "");
 	return cleanedNumeric=="" ? 0:cleanedNumeric.to!long;
+}
+
+enum LastBusinessDay {
+	Y2015 = Date(2015, 12, 30),
+	Y2016 = Date(2016, 12, 29),
+	Y2017 = Date(2017, 12, 27),
+	Y2018 = Date(2018, 12, 28),
+	Y2019 = Date(2019, 12, 30),
+	Y2020 = Date(2020, 12, 30),
+	Y2021 = Date(2021, 12, 30),
+	Y2022 = Date(2022, 12, 29)
 }

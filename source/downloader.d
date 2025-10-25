@@ -12,7 +12,7 @@ module com.davidjung.spider.downloader;
 import std.stdio:File;
 import std.conv:to;
 import std.datetime.date;
-import std.net.curl;
+import std.net.curl: HTTP, post;
 import std.string;
 import std.algorithm;
 import asdf;
@@ -37,7 +37,15 @@ class Downloader {
      * Returns: 전종목 시세정보 [KrxCapRes]
      */
     public KrxCapRes getKrxCapAll(Date date) {
-        auto content = post("http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", [
+        HTTP conn = HTTP("https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd");
+        conn.addRequestHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+        conn.addRequestHeader("Accept", "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3");
+        conn.addRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        conn.addRequestHeader("Host", "data.krx.co.kr");
+        conn.addRequestHeader("Origin", "https://data.krx.co.kr");
+        conn.addRequestHeader("Referer", "https://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020101");
+        conn.addRequestHeader("X-Requested-With", "XMLHttpRequest");
+        auto content = post("https://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd", [
             "bld":"dbms/MDC/STAT/standard/MDCSTAT01501",
             "mktId":"ALL",
             "locale":"ko_KR",
@@ -45,7 +53,7 @@ class Downloader {
             "share":"1",
             "money":"1",
             "csvxls_isNo":"false",
-        ]);
+        ], conn);
         string jsonText = content.to!string;
         return jsonText.deserialize!KrxCapRes;
     }

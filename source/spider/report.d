@@ -1,4 +1,4 @@
-module com.davidjung.spider.report;
+module spider.report;
 
 /**
  * spider-dude :: Self-made net-net & value stocks screener for KRX 📈
@@ -9,32 +9,38 @@ module com.davidjung.spider.report;
  * License: GPL-3.0
  */
 
-import std.algorithm;
-import com.davidjung.spider.types;
-import com.davidjung.spider.downloader;
+import std.algorithm: countUntil;
+
+import spider.client.dart.consts;
+import spider.client.dart.enums.statement;
+import spider.client.dart.model.bs;
+import spider.client.dart.model.bs_item;
+import spider.client.dart.model.cis;
+import spider.client.krx.model.outblock;
+import spider.loader.report_loader;
 
 /// 보고서 (재무상태표, 손익계산서, 포괄손익계산서 포함)
 class Report {
 	/// 재무상태표
-	private Bs[string] _balance;
+	private DartBS[string] _balance;
 	/// 재무상태표(Getter)
-	@property Bs[string] balance() { return _balance; }
+	@property DartBS[string] balance() { return _balance; }
 	/// 재무상태표(Setter)
-	@property void balance(Bs[string] bs) { this._balance = bs; }
+	@property void balance(DartBS[string] bs) { this._balance = bs; }
     
     /// 포괄손익계산서
-    private Cis[string] _cIncome;
+    private DartCIS[string] _cIncome;
     /// 포괄손익계산서(Getter)
-	@property Cis[string] comprehensiveIncome() { return _cIncome; }
+	@property DartCIS[string] comprehensiveIncome() { return _cIncome; }
 	/// 포괄손익계산서(Setter)
-	@property void comprehensiveIncome(Cis[string] cis) { this._cIncome = cis; }
+	@property void comprehensiveIncome(DartCIS[string] cis) { this._cIncome = cis; }
 
     /// 손익계산서
-    private Is[string] _income;
+    private DartIS[string] _income;
     /// 손익계산서(Getter)
-	@property Is[string] income() { return _income; }
+	@property DartIS[string] income() { return _income; }
 	/// 손익계산서(Setter)
-	@property void income(Is[string] income) { this._income = income; }
+	@property void income(DartIS[string] income) { this._income = income; }
 
     /// 종목코드
     private string[] corpCodes;
@@ -76,7 +82,7 @@ class Report {
      */
     public int filteringOnlyListed() {
         int count = 0;
-        Bs[string] tempBs;
+        DartBS[string] tempBs;
         OutBlock[string] tempBlocks;
         foreach(string k; blocks.keys) {
             if(k in _balance) {
@@ -99,7 +105,7 @@ class Report {
      */
     public int filteringNotCapZero() {
         int count = 0;
-        Bs[string] tempBs;
+        DartBS[string] tempBs;
         OutBlock[string] tempBlocks;
         foreach(string k; blocks.keys) {
             if(blocks[k].marketCap > 0) {
@@ -122,7 +128,7 @@ class Report {
      */
     public int filteringNotChineseCompany() {
         int count = 0;
-        Bs[string] tempBs;
+        DartBS[string] tempBs;
         OutBlock[string] tempBlocks;
         foreach(string k; blocks.keys) {
             if(k[0] != '9') {
@@ -145,7 +151,7 @@ class Report {
      */
     public int filteringKosdaq() {
         int count = 0;
-        Bs[string] tempBs;
+        DartBS[string] tempBs;
         OutBlock[string] tempBlocks;
         foreach(string k; blocks.keys) {
             if(blocks[k].mktNm == "KOSDAQ") {
@@ -172,11 +178,11 @@ class Report {
         string[] bsCorpCodes = _balance.keys;
 
         // 포괄을 쓸 껀 지 손익계산서 쓸건 지 결정
-        StatementType type = _cIncome.length > 0 ? StatementType.CIS:StatementType.IS;
-        string[] isCorpCodes =  type == StatementType.CIS ? _cIncome.keys : _income.keys;
+        StatementDART type = _cIncome.length > 0 ? StatementDART.CIS:StatementDART.IS;
+        string[] isCorpCodes =  type == StatementDART.CIS ? _cIncome.keys : _income.keys;
 
-        Bs[string] tempBs;
-        Cis[string] tempIs;
+        DartBS[string] tempBs;
+        DartCIS[string] tempIs;
         OutBlock[string] tempBlocks;
         uint count = 0;
         foreach(string code; krxCorpCodes) {
@@ -184,7 +190,7 @@ class Report {
                 continue;
 
             tempBs[code] = _balance[code];
-            if(type == StatementType.CIS) {
+            if(type == StatementDART.CIS) {
                 tempIs[code] = _cIncome[code];
             }
             else {
@@ -194,7 +200,7 @@ class Report {
             count++;
         }
         
-        if(type == StatementType.CIS) {
+        if(type == StatementDART.CIS) {
             _cIncome = tempIs;
         }
         else {
@@ -214,12 +220,12 @@ class Report {
     }
 
     /// 재무상태표 전부 취득
-    public Bs[string] getBalanceStatementAll() {
+    public DartBS[string] getBalanceStatementAll() {
         return _balance;
     }
 
     /// 종목코드로 재무상태표 취득
-    public Bs getBalanceStatement(string code) {
+    public DartBS getBalanceStatement(string code) {
         return _balance[code];
     }
 
@@ -231,12 +237,12 @@ class Report {
     }
 
     /// 포괄손익계산서 전부 취득
-    public Cis[string] getComprehensiveIncomeStatementAll() {
+    public DartCIS[string] getComprehensiveIncomeStatementAll() {
         return _cIncome;
     }
 
     /// 종목코드로 포괄손익계산서 취득
-    public Cis getComprehensiveIncomeStatement(string code) {
+    public DartCIS getComprehensiveIncomeStatement(string code) {
         return _cIncome[code];
     }
 
@@ -248,7 +254,7 @@ class Report {
     }
 
     /// 손익계산서
-    public Is getIncomeStatement(string code) {
+    public DartIS getIncomeStatement(string code) {
         return _income[code];
     }
 

@@ -1,4 +1,4 @@
-module com.davidjung.spider.formula;
+module spider.formula.formula;
 
 /**
  * spider-dude :: Self-made net-net & value stocks screener for KRX 📈
@@ -9,9 +9,15 @@ module com.davidjung.spider.formula;
  * License: GPL-3.0
  */
 
-import std.conv;
-import com.davidjung.spider.types;
-import com.davidjung.spider.report;
+import std.conv: to;
+
+import spider.report;
+import spider.formula.enums;
+import spider.formula.result;
+import spider.client.dart.consts;
+import spider.client.dart.enums.accounts;
+import spider.client.dart.model.bs;
+import spider.client.dart.model.cis;
 
 /**
  * 공식 클래스
@@ -53,7 +59,7 @@ class Formula {
         FormulaResult[][string] result;
         foreach(b; report.balance) {
             foreach(enumName; formulaNames) {
-                string key = GetCodeFrom.formulaName(enumName);
+                string key = StrFrom.formulaName(enumName);
                 string code = b.code;
                 FormulaResult r = FormulaResult(code);
                 switch(enumName) {
@@ -144,11 +150,11 @@ class Formula {
      *  code = 종목코드
      */
     private ulong calcNcav(string code) {
-        Bs balance = report.getBalanceStatement(code);
+        DartBS balance = report.getBalanceStatement(code);
         if(balance.isItemsEmpty())
             return -1;
-        long fullCurrentassets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
-        long fullLiabilities = balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
+        long fullCurrentassets = balance.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS);
+        long fullLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
         long netCurrentassets = fullCurrentassets - fullLiabilities;
 
         return netCurrentassets;
@@ -163,11 +169,11 @@ class Formula {
      *  code = 종목코드
      */
     private float calcPbr(string code) {
-        Bs balance = report.getBalanceStatement(code);
+        DartBS balance = report.getBalanceStatement(code);
         if(balance.isItemsEmpty())
             return -1;
         ulong netEquity =
-            balance.getCurrentTerm(IfrsCode.FULL_ASSETS) - balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
+            balance.getCurrentTerm(AccountIFRS.FULL_ASSETS) - balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
         ulong shares = report.getListShared(code);
         uint price = report.getClosePrice(code);
         
@@ -184,11 +190,11 @@ class Formula {
      *  code = 종목코드
      */
     private float calcPer(string code) {
-        Cis cIncome = report.getComprehensiveIncomeStatement(code);
+        DartCIS cIncome = report.getComprehensiveIncomeStatement(code);
         if(cIncome.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
-        double fullProfitloss = cIncome.q(IfrsCode.FULL_PROFITLOSS).to!double;
+        double fullProfitloss = cIncome.q(AccountIFRS.FULL_PROFITLOSS).to!double;
 
        if(marketCap==0 || fullProfitloss==0) {
             return -1;
@@ -208,17 +214,17 @@ class Formula {
      *  code = 종목코드
      */
     private float calcEvEbita(string code) {
-        Bs balance = report.getBalanceStatement(code);
-        Is income = report.getIncomeStatement(code);
+        DartBS balance = report.getBalanceStatement(code);
+        DartIS income = report.getIncomeStatement(code);
         if(balance.isItemsEmpty() || income.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
-        ulong fullLiabilities = balance.getCurrentTerm(IfrsCode.FULL_LIABILITIES);
-        ulong fullCurrentassets = balance.getCurrentTerm(IfrsCode.FULL_CURRENTASSETS);
+        ulong fullLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
+        ulong fullCurrentassets = balance.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS);
     
-        ulong incomeLoss = income.queryDartStatement(DartCode.OPERATING_INCOME_LOSS);
-        ulong expense = income.queryDartStatement(DartCode.DEPRECIATION_EXPENSE) +
-            income.queryDartStatement(DartCode.AMORTISATION_EXPENSE);
+        ulong incomeLoss = income.queryDartStatement(AccountDART.OPERATING_INCOME_LOSS);
+        ulong expense = income.queryDartStatement(AccountDART.DEPRECIATION_EXPENSE) +
+            income.queryDartStatement(AccountDART.AMORTISATION_EXPENSE);
 
        if(marketCap==0 || fullLiabilities==0 || fullCurrentassets==0 || incomeLoss==0 || expense==0)
             return -1;
@@ -236,18 +242,18 @@ class Formula {
      *  code = 종목코드
      */
     private float calcGpa(string code) {
-        Bs balance = report.getBalanceStatement(code);
+        DartBS balance = report.getBalanceStatement(code);
         if(balance.isItemsEmpty())
             return -1;
-        double fullAssets = balance.getCurrentTerm(IfrsCode.FULL_ASSETS).to!double;
+        double fullAssets = balance.getCurrentTerm(AccountIFRS.FULL_ASSETS).to!double;
         double fullGrossProfit = 0;
 
         if(report.isComprehensive()) {
-            Cis income = report.getComprehensiveIncomeStatement(code);
-            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT).to!double;
+            DartCIS income = report.getComprehensiveIncomeStatement(code);
+            fullGrossProfit = income.q(AccountIFRS.FULL_GROSSPROFIT).to!double;
         } else {
-            Is income = report.getIncomeStatement(code);
-            fullGrossProfit = income.q(IfrsCode.FULL_GROSSPROFIT).to!double;
+            DartIS income = report.getIncomeStatement(code);
+            fullGrossProfit = income.q(AccountIFRS.FULL_GROSSPROFIT).to!double;
         }
         
         if(fullGrossProfit==0 || fullAssets==0)

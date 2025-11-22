@@ -1,30 +1,35 @@
 module spider.client.dart.open_dart;
 
+import std.file: read, remove;
 import std.array: appender;
 import curl = std.net.curl;
 import std.conv: to;
 import std.regex: regex, matchAll, RegexMatch;
+import std.zip: ZipArchive;
+import std.windows.charset;
 
+import spider.common.enums.path: Path;
+import spider.common.util.mkdir: Mkdir;
+import spider.common.util.korean: CP949;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
 import spider.client.dart.enums.report_file_type;
+import spider.client.dart.model.opendart: DownloadResult;
 import spider.client.dart.model.report_file_url;
 import spider.client.dart.consts: DART_FILE_URL, DART_FILE_URL_RX;
+import spider.client.dart.header;
 
+
+/**
+ * opendart 클라이언트
+ * See_Also: https://opendart.fss.or.kr
+ */
 class OpenDart {
     private static string getHTML() {
-        curl.HTTP h = curl.HTTP();
-        h.addRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        h.addRequestHeader("Accept", "text/html, */*; q=0.01");
-        h.addRequestHeader("Accept-Language", "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3");
-        h.addRequestHeader("X-Requested-With", "XMLHttpRequest");
-        h.addRequestHeader("Origin", "https://opendart.fss.or.kr");
-        h.addRequestHeader("Referer", "https://opendart.fss.or.kr/disclosureinfo/fnltt/dwld/main.do");
-        h.addRequestHeader("Sec-Fetch-Dest", "empty");
-        h.addRequestHeader("Sec-Fetch-Mode", "cors");
-        h.addRequestHeader("Sec-Fetch-Site", "same-origin");
-        h.addRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0");
-        return curl.post(DART_FILE_URL, ["":""], h).to!string;
+        return curl.post(
+            DART_FILE_URL, ["":""],
+            OpenDartHeader.ofFnlttDwldMain()
+        ).to!string;
     }
 
     public static DartReportFileUrl[] getUrls() {
@@ -52,33 +57,58 @@ class OpenDart {
      *   reportFileType = 보고서파일종류
      *   period = N분기
      */
-    public static bool download(string ymd, ReportFileType reportFileType, Period period) {
-        curl.HTTP h = curl.HTTP();
-        h.addRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        h.addRequestHeader("Accept-Language", "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3");
-        h.addRequestHeader("Connection", "keep-alive");
-        h.addRequestHeader("Host", "opendart.fss.or.kr");
-        h.addRequestHeader("Priority", "u=0, i");
-        h.addRequestHeader("Referer", "https://opendart.fss.or.kr/disclosureinfo/fnltt/dwld/main.do");
-        h.addRequestHeader("Sec-Fetch-Dest", "document");
-        h.addRequestHeader("Sec-Fetch-Mode", "navigate");
-        h.addRequestHeader("Sec-Fetch-Site", "same-origin");
-        h.addRequestHeader("Sec-Fetch-User", "?1");
-        h.addRequestHeader("Upgrade-Insecure-Requests", "1");
-        h.addRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0");
+    public static DownloadResult download(string ymd, ReportFileType reportFileType, Period period) {
+        DownloadResult result = DownloadResult(ymd, reportFileType, period);
+        
         string _reportFileType = EnumTo.reportFileType(reportFileType);
         string _period = EnumTo.period(period);
+        Mkdir.dartdata();
         foreach(DartReportFileUrl url ; getUrls()) {
             if (url.ymd==ymd && url.reportFileType==_reportFileType && url.period==_period) {
-                curl.download(url.get(), "./dartdata/"~url.getZipFileName(), h);
-                return true;
+                result.zipFilePath = Path.DART_DATA_WITH_DOT~"/"~url.getZipFileName();
+                curl.download(
+                    url.get(),
+                    result.zipFilePath,
+                    OpenDartHeader.ofDownloadFnlttZip());
+                result.doneYN = true;
+                return result;
             }
         }
-        return false;
+        result.doneYN = false;
+        return result;
+    }
+
+    public static void unzip(DownloadResult input, bool rmZipFile=false) {
+        auto zip = new ZipArchive(read(input.zipFilePath));
+        import std.stdio: writefln, File;
+        foreach (name, meber; zip.directory) {
+            //writefln("%10s  %08x  %s", meber.expandedSize, meber.crc32, name);
+            //assert(meber.expandedData.length == 0);
+            
+            string nameUTF8 = CP949.conv(cast(const(ubyte)[])name);
+            zip.expand(meber);
+            string bodyUTF8 = CP949.conv(meber.expandedData);
+
+            File f = File(Path.DART_DATA_WITH_DOT~"/"~nameUTF8, "wb");
+            scope(exit) f.close();
+            f.rawWrite(bodyUTF8);
+        }
+        if (rmZipFile) {
+            remove(input.zipFilePath);
+        }
     }
 }
 
 unittest {
     //Dart.getUrls();
-    OpenDart.download("2024", ReportFileType.BS, Period.Q1);
+    //OpenDart.download("2024", ReportFileType.BS, Period.Q1);
+
+    DownloadResult result;
+    result.ymd = "2024";
+    result.reportFileType = ReportFileType.BS;
+    result.period = Period.Q1;
+    result.zipFilePath = Path.DART_DATA_WITH_DOT~"/2024_1Q_BS_20250221162310.zip";
+    result.doneYN = true;
+
+    OpenDart.unzip(result, true);
 }

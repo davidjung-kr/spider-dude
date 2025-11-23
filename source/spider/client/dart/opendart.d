@@ -1,5 +1,6 @@
-module spider.client.dart.open_dart;
+module spider.client.dart.opendart;
 
+import std.stdio: File;
 import std.file: read, remove;
 import std.array: appender;
 import curl = std.net.curl;
@@ -15,10 +16,9 @@ import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
 import spider.client.dart.enums.report_file_type;
 import spider.client.dart.model.opendart: DownloadResult;
-import spider.client.dart.model.report_file_url;
+import spider.client.dart.model.report_file_url: DartReportFileUrl;
 import spider.client.dart.consts: DART_FILE_URL, DART_FILE_URL_RX;
 import spider.client.dart.header;
-
 
 /**
  * opendart 클라이언트
@@ -80,7 +80,6 @@ class OpenDart {
 
     public static void unzip(DownloadResult input, bool rmZipFile=false) {
         auto zip = new ZipArchive(read(input.zipFilePath));
-        import std.stdio: writefln, File;
         foreach (name, meber; zip.directory) {
             //writefln("%10s  %08x  %s", meber.expandedSize, meber.crc32, name);
             //assert(meber.expandedData.length == 0);
@@ -103,12 +102,11 @@ unittest {
     //Dart.getUrls();
     //OpenDart.download("2024", ReportFileType.BS, Period.Q1);
 
-    DownloadResult result;
-    result.ymd = "2024";
-    result.reportFileType = ReportFileType.BS;
-    result.period = Period.Q1;
-    result.zipFilePath = Path.DART_DATA_WITH_DOT~"/2024_1Q_BS_20250221162310.zip";
-    result.doneYN = true;
-
-    OpenDart.unzip(result, true);
+    // DownloadResult result;
+    // result.ymd = "2024";
+    // result.reportFileType = ReportFileType.BS;
+    // result.period = Period.Q1;
+    // result.zipFilePath = Path.DART_DATA_WITH_DOT~"/2024_1Q_BS_20250221162310.zip";
+    // result.doneYN = true;
+    // OpenDart.unzip(result, true);
 }

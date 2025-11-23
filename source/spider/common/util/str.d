@@ -2,9 +2,8 @@ module spider.common.util.str;
 
 import std.conv: to;
 import std.array: replace;
-import std.string: strip;
+import std.string: strip, format;
 import std.algorithm: filter;
-
 
 struct Str {
 	/// 금액형태의 문자열을 long형태로 변환
@@ -38,4 +37,36 @@ struct Str {
 	public static uint numbericToUint(string numberic) {
 		return cleansingForNumeric(numberic).to!uint;
 	}
+
+	/// 한국거래소 currentDatetime를 ISO 표준으로 변경
+	public static string toKrxCurDtToISOString(string currentDatetime) {
+		//2025.11.23 AM 02:45:15
+		//20180101T123010
+
+		ubyte gap = "AM"==currentDatetime[11..13] ? 0:12;
+		string hours = "%02d".format(to!int(currentDatetime[14..16]));
+
+		char[] result = new char[15];
+		result[0] = currentDatetime[0];
+		result[1] = currentDatetime[1];
+		result[2] = currentDatetime[2];
+		result[3] = currentDatetime[3];
+		result[4] = currentDatetime[5];
+		result[5] = currentDatetime[6];
+		result[6] = currentDatetime[8];
+		result[7] = currentDatetime[9];
+		result[8] = 'T';
+		result[9] = hours[0];
+		result[10] = hours[1];
+		result[11] = currentDatetime[17];
+		result[12] = currentDatetime[18];
+		result[13] = currentDatetime[20];
+		result[14] = currentDatetime[21];
+
+		return cast(string)result;
+	}
+}
+
+unittest {
+	assert(Str.toKrxCurDtToISOString("2025.11.23 AM 02:45:15")=="20251123T024515");
 }

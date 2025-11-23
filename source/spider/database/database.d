@@ -26,7 +26,7 @@ import spider.client.dart.enums.accounts;
 import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
-import spider.client.krx.data_krx;
+import spider.client.krx.datakrx;
 import spider.client.krx.model.outblock;
 import spider.database.model.row_krx;
 import spider.database.model.row_dart;

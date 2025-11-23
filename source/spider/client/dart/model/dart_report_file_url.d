@@ -2,6 +2,9 @@ module spider.client.dart.model.report_file_url;
 
 import std.string: format;
 
+/** 
+ * dart 보고서파일 다운로드 URL
+ */
 struct DartReportFileUrl {
     /** 기준연도 */
     public string ymd;
@@ -41,6 +44,7 @@ struct DartReportFileUrl {
     /** Zip파일이름 취득 */
     public string getZipFileName() {
         return format("%s_%s_%s_%s.zip",
-            this.ymd, this.period, this.reportFileType, this.idYMS);
+            this.ymd, this.period, this.reportFileType, this.idYMS
+        );
     }
 }

@@ -12,7 +12,7 @@ module spider.loader.report_loader;
 import std.datetime: Date;
 
 import spider.report;
-import spider.client.krx.data_krx;
+import spider.client.krx.datakrx;
 
 struct ReportLoader {
     /**

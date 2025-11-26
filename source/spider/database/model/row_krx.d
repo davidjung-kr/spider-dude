@@ -6,7 +6,7 @@ import std.datetime: SysTime;
 /** 한국거래소 가격데이터 행 */
 struct RowKRX {
     /** 기준년월일 */
-    string baseYmd;
+    string baseYMD;
     /** 시장구분 */
     string mktId;
     /** 종목코드 */
@@ -20,15 +20,15 @@ struct RowKRX {
     /** 종가 */
     uint close;
     /** 처리년월일 */
-    string dumpYms = "";
+    string dumpYMS = "";
     
     this(SysTime sysdate) {
-        this.dumpYms = sysdate.toISOString();
+        this.dumpYMS = sysdate.toISOString();
     }
 
     /** 
      * 행 문자열 취득
-     *  baseYmd = 기준년월일
+     *  baseYMD = 기준년월일
      *  mktId = 시장구분
      *  corpCd = 종목코드
      *  corpNm = 종목명
@@ -38,6 +38,6 @@ struct RowKRX {
      */
     public string str() {
         return format("'%s', '%s', '%s', '%s', %d, %d, %d, '%s'",
-            baseYmd, mktId, corpCd, corpNm, marketCap, shares, close, dumpYms);
+            baseYMD, mktId, corpCd, corpNm, marketCap, shares, close, dumpYMS);
     }
 }

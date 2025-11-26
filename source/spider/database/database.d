@@ -30,6 +30,8 @@ import spider.client.krx.datakrx;
 import spider.client.krx.model.outblock;
 import spider.database.model.row_krx;
 import spider.database.model.row_dart;
+import spider.database.sql.krx: SQL_TB_KRX;
+import spider.database.sql.bs: SQL_TB_BS;
 
 import ddbc;
 
@@ -62,39 +64,13 @@ class DataDump {
     /** 한국거래소 가격테이블 생성 */
     private void createNewKrxTable() {
         Statement tx = con.createStatement();
-        tx.executeUpdate(`CREATE TABLE krx (
-              baseYmd CHAR(8) NOT NULL
-            , mktId CHAR(3) NOT NULL
-            , corpCd CHAR(6) NOT NULL
-            , corpNm CHAR(15) NOT NULL
-            , cap BIGINT NOT NULL DEFAULT 0
-            , shares INT NOT NULL DEFAULT 0
-            , close INT NOT NULL DEFAULT 0
-            , dumpYms DATETIME NOT NULL
-
-            , PRIMARY KEY (baseYmd, mktId, corpCd)
-        )`);
+        tx.executeUpdate(SQL_TB_KRX.CREATE_IF_NOT_EXISTS);
     }
 
     /** 재무제표 테이블 생성 */
     private void createNewBalanceStatementTable() {
         Statement tx = con.createStatement();
-        tx.executeUpdate(`CREATE TABLE bs (
-              baseYear CHAR(4) NOT NULL
-            , basePeriod CHAR(2) NOT NULL
-            , reportType CHAR(3) NOT NULL
-            , corpCd CHAR(6) NOT NULL
-
-            , fullAssets INT NOT NULL DEFAULT 0
-            , fullCurrentAssets INT NOT NULL DEFAULT 0
-            , fullCashAndCashEquivalents INT NOT NULL DEFAULT 0
-            , fullLiabilities INT NOT NULL DEFAULT 0
-            , fullCurrentLiabilities INT NOT NULL DEFAULT 0
-
-            , dumpYms DATETIME NOT NULL
-
-            , PRIMARY KEY (baseYear, basePeriod, reportType, corpCd)
-        )`);
+        tx.executeUpdate(SQL_TB_BS.CREATE_IF_NOT_EXISTS);
     }
 
     /** 포괄손익계산서 테이블 생성 */
@@ -197,7 +173,7 @@ class DataDump {
         beginTran();
         foreach(string corpCd ; krxPriceData.keys) {
             RowKRX row = RowKRX(Clock.currTime());
-            row.baseYmd = toYmd(baseYmd);
+            row.baseYMD = toYmd(baseYmd);
             row.corpCd = corpCd;
             row.mktId = krxPriceData[corpCd].mktId;
             row.corpNm = krxPriceData[corpCd].name;

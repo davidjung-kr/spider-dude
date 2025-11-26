@@ -16,4 +16,10 @@ struct Mkdir {
             mkdir(Path.DART_DATA_WITH_DOT);
         }
     }
+
+    public static void database() {
+        if (!exists(Path.DATABASE_SQLITE3_WITH_DOT) || !isDir(Path.DATABASE_SQLITE3_WITH_DOT)) {
+            mkdir(Path.DATABASE_SQLITE3_WITH_DOT);
+        }
+    }
 }

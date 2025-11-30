@@ -22,7 +22,7 @@ import spider.client.dart.consts;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
 import spider.client.dart.enums.report_type;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
@@ -64,7 +64,7 @@ class DataDump {
     /** 한국거래소 가격테이블 생성 */
     private void createNewKrxTable() {
         Statement tx = con.createStatement();
-        tx.executeUpdate(SQL_TB_KRX.CREATE_IF_NOT_EXISTS);
+        tx.executeUpdate(SQL_TB_KRX.CREATE_TABLE_IF_NOT_EXISTS);
     }
 
     /** 재무제표 테이블 생성 */
@@ -92,13 +92,6 @@ class DataDump {
 
             , PRIMARY KEY (baseYear, basePeriod, reportType, corpCd)
         )`);
-    }
-
-    /** 한국거래소 가격데이터 추가 */
-    private void insertKrxTable(RowKRX row) {
-        Statement tx = con.createStatement();
-        tx.executeUpdate(
-            format(`INSERT INTO krx VALUES(%s)`, row.str() ));
     }
 
     /**
@@ -172,7 +165,7 @@ class DataDump {
         auto getDt = Clock.currTime();
         beginTran();
         foreach(string corpCd ; krxPriceData.keys) {
-            RowKRX row = RowKRX(Clock.currTime());
+            RowKRX row = RowKRX();
             row.baseYMD = toYmd(baseYmd);
             row.corpCd = corpCd;
             row.mktId = krxPriceData[corpCd].mktId;
@@ -180,7 +173,7 @@ class DataDump {
             row.marketCap = krxPriceData[corpCd].marketCap;
             row.shares = krxPriceData[corpCd].listShared;
             row.close = krxPriceData[corpCd].closePrice;
-            insertKrxTable(row);
+            // insertKrxTable(row);
         }
         endTran();
         auto edDt = Clock.currTime();
@@ -207,11 +200,11 @@ class DataDump {
                 , EnumTo.reportType(type)
                 , corpCd
 
-                , bsData[corpCd].getCurrentTerm(AccountIFRS.FULL_ASSETS)
-                , bsData[corpCd].getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS)
-                , bsData[corpCd].getCurrentTerm(AccountIFRS.FULL_CASH_AND_CASH_EQUIVALENTS)
-                , bsData[corpCd].getCurrentTerm(AccountIFRS.FULL_LIABILITIES)
-                , bsData[corpCd].getCurrentTerm(AccountIFRS.FULL_CURRENT_LIABILITIES)
+                , bsData[corpCd].getCurrentTerm(Account.FULL_ASSETS)
+                , bsData[corpCd].getCurrentTerm(Account.FULL_CURRENTASSETS)
+                , bsData[corpCd].getCurrentTerm(Account.FULL_CASH_AND_CASH_EQUIVALENTS)
+                , bsData[corpCd].getCurrentTerm(Account.FULL_LIABILITIES)
+                , bsData[corpCd].getCurrentTerm(Account.FULL_CURRENT_LIABILITIES)
             );
         }
         endTran();
@@ -230,11 +223,11 @@ class DataDump {
             row.basePeriod = EnumTo.period(period);
             row.reportType = EnumTo.reportType(type);
             row.corpCd = corpCd;
-            row.fullProfitloss = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(AccountIFRS.FULL_PROFITLOSS));
-            row.fullProfitLossBeforeTax = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(AccountIFRS.FULL_PROFIT_LOSS_BEFORE_TAX));
-            row.fullProfitLossAttributableToOwnersOfParent = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(AccountIFRS.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT));
-            row.operatingIncomeLoss = csData[corpCd].getCurrentTerm(EnumTo.dartCode(AccountDART.OPERATING_INCOME_LOSS));
-            row.fullGrossProfit = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(AccountIFRS.FULL_GROSSPROFIT));
+            row.fullProfitloss = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFITLOSS));
+            row.fullProfitLossBeforeTax = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_BEFORE_TAX));
+            row.fullProfitLossAttributableToOwnersOfParent = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT));
+            row.operatingIncomeLoss = csData[corpCd].getCurrentTerm(EnumTo.dartCode(Account.OPERATING_INCOME_LOSS));
+            row.fullGrossProfit = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_GROSSPROFIT));
             insertComprehensiveIncomeStatementTable(row);
         }
         endTran();

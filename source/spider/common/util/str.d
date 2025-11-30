@@ -3,6 +3,7 @@ module spider.common.util.str;
 import std.conv: to;
 import std.array: replace;
 import std.string: strip, format;
+import std.datetime: SysTime;
 import std.algorithm: filter;
 
 struct Str {
@@ -65,6 +66,24 @@ struct Str {
 
 		return cast(string)result;
 	}
+	
+	/// SQLITE3 ISO8601 방식 문자열로 리턴
+	/// 
+	/// `YYYY-MM-DD HH:MM:SS.SSS`
+	public static string ofTimestamp(SysTime yms) {
+		string bf = yms.toISOExtString(); // YYYY-MM-DDTHH:MM:SS.FFFFFFFTZ
+		
+		char[] af = new char[23];
+		for(ubyte i=0; i<10; i++) {
+			af[i] = bf[i];
+		}
+		af[10] = ' ';
+		for(ubyte i=11; i<23; i++) {
+			af[i] = bf[i];
+		}
+		return cast(string)af;
+	}
+	
 }
 
 unittest {

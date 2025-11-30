@@ -3,7 +3,7 @@ module spider.client.dart.model.cis;
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.model.cis_item;
 
 /// 손익계산서
@@ -75,7 +75,7 @@ struct DartCIS {
 	}
 
 	/// 재무제표 질의: 당기 누적을 기본으로 가져옴
-	long q(AccountIFRS code) {
+	long q(Account code) {
 		import std.stdio;
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == EnumTo.ifrsCode(code)) {
@@ -86,7 +86,7 @@ struct DartCIS {
 	}
 
 	/// 다트 계정과목 조회: 당기 누적을 긱본으로 가져옴
-	long queryDartStatement(AccountDART code) {
+	long queryDartStatement(Account code) {
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == EnumTo.dartCode(code)) {
 				return this.items[i].currentAccumulation;

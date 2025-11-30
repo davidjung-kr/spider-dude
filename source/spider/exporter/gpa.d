@@ -14,7 +14,7 @@ import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.enums.report_type;
 
@@ -58,8 +58,8 @@ class GpaStocks {
 			ff.writef("'%s\t%s\t%d\t%d\t%f\t%f\t%f\n",
 				pbr.code,
 				myReport.getCorpName(pbr.code),
-				balance.getCurrentTerm(AccountIFRS.FULL_ASSETS),
-				income.q(AccountIFRS.FULL_GROSSPROFIT),
+				balance.getCurrentTerm(Account.FULL_ASSETS),
+				income.q(Account.FULL_GROSSPROFIT),
 				gpa.ratio,
 				pbr.ratio,
 				per.ratio

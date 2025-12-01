@@ -3,6 +3,9 @@ module spider.database.enums.sqlite3;
 enum SQLite3Table {
     FILE_PATH  = "./database",
     
+    LOG_FILE_NAME = "log.sqlite",
+    LOG_FILE_FULL_PATH = FILE_PATH~"/"~LOG_FILE_NAME,
+    
     KRX_FILE_NAME = "krx.sqlite",
     KRX_FILE_FULL_PATH = FILE_PATH~"/"~KRX_FILE_NAME,
 

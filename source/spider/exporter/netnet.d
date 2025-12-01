@@ -13,7 +13,7 @@ import spider.formula.result;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 import spider.client.dart.enums.period;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.enums.report_type;
 
@@ -50,17 +50,17 @@ class NetNetStocks {
 
 			DartBS bs = myReport.getBalanceStatement(ncav.code);
 			DartCIS cis = myReport.getComprehensiveIncomeStatement(ncav.code);
-			long revenue = cis.q(AccountIFRS.FULL_REVENUE);
-			long profitloss = cis.q(AccountIFRS.FULL_PROFITLOSS);
+			long revenue = cis.q(Account.FULL_REVENUE);
+			long profitloss = cis.q(Account.FULL_PROFITLOSS);
 
 			//float netProfit = profitloss/revenue;
 			ff.writef("%s\t%s\t%d\t%d\t%d\t%d\t%f\t%f\t%f\n",
 				ncav.code,
 				myReport.getCorpName(ncav.code),
 				cap,
-				bs.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS),
-				cis.q(AccountIFRS.FULL_REVENUE),
-				cis.q(AccountIFRS.FULL_PROFITLOSS),
+				bs.getCurrentTerm(Account.FULL_CURRENTASSETS),
+				cis.q(Account.FULL_REVENUE),
+				cis.q(Account.FULL_PROFITLOSS),
 				per.ratio,
 				1/per.ratio,
 				ncav.value

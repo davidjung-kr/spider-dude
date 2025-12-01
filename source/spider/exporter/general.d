@@ -23,7 +23,7 @@ import spider.client.dart.consts;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
 import spider.client.dart.enums.report_type;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
@@ -73,18 +73,18 @@ class GeneralReport {
 			row.closePrice = rpt.getClosePrice(codes[i]); /// 종가
 			
 			DartBS balance = rpt.getBalanceStatement(codes[i]);
-			row.fullAssets = balance.getCurrentTerm(AccountIFRS.FULL_ASSETS);
-			row.fullCurrentAssets = balance.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS);
-			row.fullCashAndCashEquivalents = balance.getCurrentTerm(AccountIFRS.FULL_CASH_AND_CASH_EQUIVALENTS);
-			row.fullCurrentLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_CURRENT_LIABILITIES);
-			row.fullLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
+			row.fullAssets = balance.getCurrentTerm(Account.FULL_ASSETS);
+			row.fullCurrentAssets = balance.getCurrentTerm(Account.FULL_CURRENTASSETS);
+			row.fullCashAndCashEquivalents = balance.getCurrentTerm(Account.FULL_CASH_AND_CASH_EQUIVALENTS);
+			row.fullCurrentLiabilities = balance.getCurrentTerm(Account.FULL_CURRENT_LIABILITIES);
+			row.fullLiabilities = balance.getCurrentTerm(Account.FULL_LIABILITIES);
 
 			DartCIS cis = rpt.getComprehensiveIncomeStatement(codes[i]);
-			row.fullProfitloss = cis.q(AccountIFRS.FULL_PROFITLOSS);
-			row.fullProfitLossBeforeTax = cis.q(AccountIFRS.FULL_PROFIT_LOSS_BEFORE_TAX);
-			row.fullProfitLossAttributableToOwnersOfParent = cis.q(AccountIFRS.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT);
-			row.operatingIncomeLoss = cis.queryDartStatement(AccountDART.OPERATING_INCOME_LOSS);
-			row.fullGrossProfit = cis.q(AccountIFRS.FULL_GROSSPROFIT);
+			row.fullProfitloss = cis.q(Account.FULL_PROFITLOSS);
+			row.fullProfitLossBeforeTax = cis.q(Account.FULL_PROFIT_LOSS_BEFORE_TAX);
+			row.fullProfitLossAttributableToOwnersOfParent = cis.q(Account.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT);
+			row.operatingIncomeLoss = cis.queryDartStatement(Account.OPERATING_INCOME_LOSS);
+			row.fullGrossProfit = cis.q(Account.FULL_GROSSPROFIT);
 			rows ~= row;
 		}
 		return rows;

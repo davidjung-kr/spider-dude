@@ -1,19 +1,7 @@
-module spider.client.dart.enums.accounts;
+module spider.client.dart.enums.account;
 
-/// DART 계정코드
-enum AccountDART {
-	/// `dart_ShortTermTradeReceivable`: 매출채권
-	SHORT_TERM_TRADE_RECEIVABLE,
-	/// `dart_DepreciationExpense`:감가상각비
-	DEPRECIATION_EXPENSE,
-	/// `dart_OperatingIncomeLoss`:영업이익
-	OPERATING_INCOME_LOSS,
-	/// `dart_AmortisationExpense`:무형자산상각비
-	AMORTISATION_EXPENSE
-}
-
-/// IFRS 코드
-enum AccountIFRS {
+/// 계정과목 코드
+enum Account {
 	/// `ifrs-full_Assets`: 총자산
 	FULL_ASSETS,
     /// `ifrs-full_CurrentAssets`: 유동자산
@@ -46,5 +34,16 @@ enum AccountIFRS {
 	/// `ifrs-full_ProfitLossBeforeTax`: 법인세비용차감전순이익
 	FULL_PROFIT_LOSS_BEFORE_TAX,
     /// `ifrs-full_ProfitLoss`: 당기순이익
-    FULL_PROFITLOSS
+    FULL_PROFITLOSS,
+
+
+
+	/// `dart_ShortTermTradeReceivable`: 매출채권
+	SHORT_TERM_TRADE_RECEIVABLE,
+	/// `dart_DepreciationExpense`:감가상각비
+	DEPRECIATION_EXPENSE,
+	/// `dart_OperatingIncomeLoss`:영업이익
+	OPERATING_INCOME_LOSS,
+	/// `dart_AmortisationExpense`:무형자산상각비
+	AMORTISATION_EXPENSE
 }

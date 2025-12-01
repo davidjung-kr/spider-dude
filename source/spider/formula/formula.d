@@ -15,7 +15,7 @@ import spider.report;
 import spider.formula.enums;
 import spider.formula.result;
 import spider.client.dart.consts;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 
@@ -153,8 +153,8 @@ class Formula {
         DartBS balance = report.getBalanceStatement(code);
         if(balance.isItemsEmpty())
             return -1;
-        long fullCurrentassets = balance.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS);
-        long fullLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
+        long fullCurrentassets = balance.getCurrentTerm(Account.FULL_CURRENTASSETS);
+        long fullLiabilities = balance.getCurrentTerm(Account.FULL_LIABILITIES);
         long netCurrentassets = fullCurrentassets - fullLiabilities;
 
         return netCurrentassets;
@@ -173,7 +173,7 @@ class Formula {
         if(balance.isItemsEmpty())
             return -1;
         ulong netEquity =
-            balance.getCurrentTerm(AccountIFRS.FULL_ASSETS) - balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
+            balance.getCurrentTerm(Account.FULL_ASSETS) - balance.getCurrentTerm(Account.FULL_LIABILITIES);
         ulong shares = report.getListShared(code);
         uint price = report.getClosePrice(code);
         
@@ -194,7 +194,7 @@ class Formula {
         if(cIncome.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
-        double fullProfitloss = cIncome.q(AccountIFRS.FULL_PROFITLOSS).to!double;
+        double fullProfitloss = cIncome.q(Account.FULL_PROFITLOSS).to!double;
 
        if(marketCap==0 || fullProfitloss==0) {
             return -1;
@@ -219,12 +219,12 @@ class Formula {
         if(balance.isItemsEmpty() || income.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
-        ulong fullLiabilities = balance.getCurrentTerm(AccountIFRS.FULL_LIABILITIES);
-        ulong fullCurrentassets = balance.getCurrentTerm(AccountIFRS.FULL_CURRENTASSETS);
+        ulong fullLiabilities = balance.getCurrentTerm(Account.FULL_LIABILITIES);
+        ulong fullCurrentassets = balance.getCurrentTerm(Account.FULL_CURRENTASSETS);
     
-        ulong incomeLoss = income.queryDartStatement(AccountDART.OPERATING_INCOME_LOSS);
-        ulong expense = income.queryDartStatement(AccountDART.DEPRECIATION_EXPENSE) +
-            income.queryDartStatement(AccountDART.AMORTISATION_EXPENSE);
+        ulong incomeLoss = income.queryDartStatement(Account.OPERATING_INCOME_LOSS);
+        ulong expense = income.queryDartStatement(Account.DEPRECIATION_EXPENSE) +
+            income.queryDartStatement(Account.AMORTISATION_EXPENSE);
 
        if(marketCap==0 || fullLiabilities==0 || fullCurrentassets==0 || incomeLoss==0 || expense==0)
             return -1;
@@ -245,15 +245,15 @@ class Formula {
         DartBS balance = report.getBalanceStatement(code);
         if(balance.isItemsEmpty())
             return -1;
-        double fullAssets = balance.getCurrentTerm(AccountIFRS.FULL_ASSETS).to!double;
+        double fullAssets = balance.getCurrentTerm(Account.FULL_ASSETS).to!double;
         double fullGrossProfit = 0;
 
         if(report.isComprehensive()) {
             DartCIS income = report.getComprehensiveIncomeStatement(code);
-            fullGrossProfit = income.q(AccountIFRS.FULL_GROSSPROFIT).to!double;
+            fullGrossProfit = income.q(Account.FULL_GROSSPROFIT).to!double;
         } else {
             DartIS income = report.getIncomeStatement(code);
-            fullGrossProfit = income.q(AccountIFRS.FULL_GROSSPROFIT).to!double;
+            fullGrossProfit = income.q(Account.FULL_GROSSPROFIT).to!double;
         }
         
         if(fullGrossProfit==0 || fullAssets==0)

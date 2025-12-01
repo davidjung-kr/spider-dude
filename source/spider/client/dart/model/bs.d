@@ -2,7 +2,7 @@ module spider.client.dart.model.bs;
 
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.model.bs_item;
 
 /// 재무상태표
@@ -53,7 +53,7 @@ struct DartBS {
 	BalanceStatementItem[] items;
 
 	/// 당기 금액 질의
-	long getCurrentTerm(AccountIFRS code) {
+	long getCurrentTerm(Account code) {
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == EnumTo.ifrsCode(code)) {
 				return this.items[i].currentTerm;
@@ -63,7 +63,7 @@ struct DartBS {
 	}
 
 	/// 전기 금액 질의
-	long getEndOfTheFirstPeriod(AccountIFRS code) {
+	long getEndOfTheFirstPeriod(Account code) {
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == EnumTo.ifrsCode(code)) {
 				return this.items[i].endOfTheFirstPeriod;
@@ -73,7 +73,7 @@ struct DartBS {
 	}
 
 	/// 전전기 금액 질의
-	long getEndOfThePreviousPeriod(AccountIFRS ifrsCode) {
+	long getEndOfThePreviousPeriod(Account ifrsCode) {
 		for(int i=0; i<this.items.length; i++) {
 			if(this.items[i].itemCode == EnumTo.ifrsCode(ifrsCode)) {
 				return this.items[i].endOfThePreviousPeriod;

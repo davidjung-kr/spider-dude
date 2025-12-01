@@ -14,7 +14,7 @@ import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.period;
-import spider.client.dart.enums.accounts;
+import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.enums.report_type;
 

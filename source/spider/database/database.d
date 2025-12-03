@@ -29,7 +29,7 @@ import spider.client.dart.model.cis;
 import spider.client.krx.datakrx;
 import spider.client.krx.model.outblock;
 import spider.database.model.row_krx;
-import spider.database.model.row_dart;
+import spider.database.model.dart;
 import spider.database.sql.krx: SQL_TB_KRX;
 import spider.database.sql.bs: SQL_TB_BS;
 

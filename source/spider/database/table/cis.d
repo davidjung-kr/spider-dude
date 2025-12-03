@@ -11,4 +11,9 @@ class TableCIS : SQLite3TableObject {
     this() {
         super(SQLite3Table.CIS_FILE_FULL_PATH);
     }
+
+    void createIfNotExists() {
+        Statement tx = this.con.createStatement();
+        tx.executeUpdate(SQL_TB_CIS.CREATE_TABLE_IF_NOT_EXISTS);
+    }
 }

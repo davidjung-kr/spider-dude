@@ -17,5 +17,6 @@ immutable string[Account] COL_MAP_BS = [
     Account.FULL_GROSSPROFIT : "fGrft",
     Account.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT : "fPrft2Own",
     Account.FULL_PROFIT_LOSS_BEFORE_TAX : "fPrftBfTax",
-    Account.FULL_PROFITLOSS : "fPflss"
+    Account.FULL_PROFITLOSS : "fPflss",
+    Account.OPERATING_INCOME_LOSS : "oprtIcmLss"
 ];

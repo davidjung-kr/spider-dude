@@ -27,11 +27,3 @@ CREATE INDEX IF NOT EXISTS log_idx_2 ON log (txYMS, txUUID);`,
 
     INSERT = `INSERT INTO log (txYMS, txNm, txSeq, txUUID, txCtnt) VALUES('%s', '%s', %d, '%s', '%s')`
 }
-
-struct SQLMapperLog {
-    public static string ofInsert(RowLog row) {
-        return format(SQL_TB_LOG.INSERT,
-            row.txYMS, row.txNm, row.txSeq, row.txUUID, row.txCtnt
-        );
-    }
-}

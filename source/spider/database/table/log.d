@@ -1,7 +1,8 @@
 module spider.database.table.log;
 
 import spider.database.enums.sqlite3: SQLite3Table;
-import spider.database.sql.log: SQL_TB_LOG, SQLMapperLog;
+import spider.database.sql.log: SQL_TB_LOG;
+import spider.database.sql.mapper: SQLMapper;
 import spider.database.model.row_log: RowLog;
 import spider.database.table.object: SQLite3TableObject;
 
@@ -26,7 +27,7 @@ class TableLog : SQLite3TableObject {
 
     void insert(RowLog row) {
         Statement tx = this.con.createStatement();
-        tx.executeUpdate(SQLMapperLog.ofInsert(row));
+        tx.executeUpdate(SQLMapper.Log.ofInsert(row));
     }
 }
 

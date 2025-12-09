@@ -30,6 +30,7 @@ import spider.client.krx.datakrx;
 import spider.client.krx.model.outblock;
 import spider.database.model.row_krx;
 import spider.database.model.dart;
+import spider.database.sql.mapper: SQLMapper;
 import spider.database.sql.krx: SQL_TB_KRX;
 import spider.database.sql.bs: SQL_TB_BS;
 
@@ -145,7 +146,7 @@ class DataDump {
     /** 포괄손익계산서 데이터 추가 */
     private void insertComprehensiveIncomeStatementTable(RowDartCIS row) {
         Statement tx = con.createStatement();
-        tx.executeUpdate(format(`INSERT INTO cis VALUES(%s)`, row.str() ));
+        tx.executeUpdate( SQLMapper.CIS.ofInsert(row) );
     }
     
     private void beginTran() {
@@ -218,16 +219,18 @@ class DataDump {
         DartCIS[string] csData = cis.getComprehensiveIncomeStatementAll();
         beginTran();
         foreach(string corpCd ; csData.keys) {
-            RowDartCIS row = RowDartCIS(Clock.currTime());
-            row.baseYear = baseYear.to!string;
-            row.basePeriod = EnumTo.period(period);
-            row.reportType = EnumTo.reportType(type);
-            row.corpCd = corpCd;
-            row.fullProfitloss = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFITLOSS));
-            row.fullProfitLossBeforeTax = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_BEFORE_TAX));
-            row.fullProfitLossAttributableToOwnersOfParent = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT));
-            row.operatingIncomeLoss = csData[corpCd].getCurrentTerm(EnumTo.dartCode(Account.OPERATING_INCOME_LOSS));
-            row.fullGrossProfit = csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_GROSSPROFIT));
+            RowDartCIS row = RowDartCIS.by(
+                baseYear.to!string,
+                EnumTo.period(period),
+                EnumTo.reportType(type),
+                corpCd,
+                csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFITLOSS)),
+                csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_BEFORE_TAX)),
+                csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_ATTRIBUTABLE_TO_OWNERS_OF_PARENT)),
+                csData[corpCd].getCurrentTerm(EnumTo.dartCode(Account.OPERATING_INCOME_LOSS)),
+                csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_GROSSPROFIT)),
+                Clock.currTime()
+            );
             insertComprehensiveIncomeStatementTable(row);
         }
         endTran();

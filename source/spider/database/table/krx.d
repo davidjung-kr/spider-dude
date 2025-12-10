@@ -2,8 +2,9 @@ module spider.database.table.krx;
 
 import spider.database.enums.sqlite3: SQLite3Table;
 import spider.database.table.object: SQLite3TableObject;
-import spider.database.sql.krx: SQL_TB_KRX, SQLMapperKRX;
-import spider.database.model.row_krx: RowKRX;
+import spider.database.sql.mapper: SQLMapper;
+import spider.database.sql.krx: SQL_TB_KRX;
+import spider.database.model.krx: RowKRX;
 
 import ddbc;
 
@@ -24,7 +25,7 @@ class TableKRX : SQLite3TableObject {
 
     void insert(RowKRX row) {
         Statement tx = this.con.createStatement();
-        tx.executeUpdate(SQLMapperKRX.ofInsert(row));
+        tx.executeUpdate(SQLMapper.KRX.ofInsert(row));
     }
 }
 

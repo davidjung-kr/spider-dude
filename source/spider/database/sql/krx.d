@@ -2,7 +2,7 @@ module spider.database.sql.krx;
 
 import std.format: format;
 
-import spider.database.model.row_krx: RowKRX;
+import spider.database.model.krx: RowKRX;
 
 enum SQL_TB_KRX {
     /// 생성문
@@ -55,26 +55,4 @@ INSERT INTO krx (
 
    SELECT_EXIST_BY_BASEYMD = `SELECT CASE WHEN COUNT(baseYMD) > 0 THEN TRUE ELSE FALSE END AS existYN
 FROM krx WHERE baseYMD='%s' GROUP BY baseYMD` 
-}
-
-struct SQLMapperKRX {
-    public static string ofInsert(RowKRX row) {
-        return format(SQL_TB_KRX.INSERT,
-            row.baseYMD,
-            row.mktId,
-            row.corpCd,
-            row.corpNm,
-            row.marketCap,
-            row.shares,
-            row.open,
-            row.high,
-            row.low,
-            row.close,
-            row.dumpYMS
-        );
-    }
-
-    public static string ofSelectExistByBaseYMD(string baseYMD) {
-        return format(SQL_TB_KRX.SELECT_EXIST_BY_BASEYMD, baseYMD);
-    }
 }

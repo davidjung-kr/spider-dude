@@ -16,6 +16,7 @@ import std.datetime: Date, Clock, SysTime;
 import std.file:exists, remove, isFile;
 
 import spider.report;
+import spider.common.util.str: Str;
 import spider.importer.dart_file;
 import spider.loader.report_loader;
 import spider.client.dart.consts;
@@ -28,7 +29,7 @@ import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 import spider.client.krx.datakrx;
 import spider.client.krx.model.outblock;
-import spider.database.model.row_krx;
+import spider.database.model.krx;
 import spider.database.model.dart;
 import spider.database.sql.mapper: SQLMapper;
 import spider.database.sql.krx: SQL_TB_KRX;
@@ -167,7 +168,7 @@ class DataDump {
         beginTran();
         foreach(string corpCd ; krxPriceData.keys) {
             RowKRX row = RowKRX();
-            row.baseYMD = toYmd(baseYmd);
+            row.baseYMD = Str.toYMD(baseYmd);
             row.corpCd = corpCd;
             row.mktId = krxPriceData[corpCd].mktId;
             row.corpNm = krxPriceData[corpCd].name;
@@ -235,10 +236,6 @@ class DataDump {
         }
         endTran();
     }
-}
-
-string toYmd(Date dt) {
-    return format("%04d%02d%02d", dt.year(), dt.month(), dt.day());
 }
 
 unittest {

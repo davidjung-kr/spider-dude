@@ -3,7 +3,7 @@ module spider.common.util.str;
 import std.conv: to;
 import std.array: replace;
 import std.string: strip, format;
-import std.datetime: SysTime;
+import std.datetime: SysTime, Date;
 import std.algorithm: filter;
 
 struct Str {
@@ -83,7 +83,10 @@ struct Str {
 		}
 		return cast(string)af;
 	}
-	
+
+	public static string toYMD(Date dt) {
+		return format("%04d%02d%02d", dt.year(), dt.month(), dt.day());
+	}
 }
 
 unittest {

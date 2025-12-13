@@ -1,9 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"asdf": "0.7.17",
+		"asdf": "0.8.0",
 		"d-unit": "0.10.2",
-		"ddbc": "0.5.9",
+		"ddbc": "0.7.0",
 		"derelict-pq": "2.2.0",
 		"derelict-util": "2.0.6",
 		"mir-algorithm": "3.22.4",

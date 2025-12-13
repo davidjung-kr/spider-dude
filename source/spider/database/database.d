@@ -21,8 +21,7 @@ import spider.importer.dart_file;
 import spider.loader.report_loader;
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
-import spider.client.dart.enums.period;
-import spider.client.dart.enums.report_type;
+import spider.client.dart.enums.report;
 import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
@@ -147,7 +146,7 @@ class DataDump {
     /** 포괄손익계산서 데이터 추가 */
     private void insertComprehensiveIncomeStatementTable(RowDartCIS row) {
         Statement tx = con.createStatement();
-        tx.executeUpdate( SQLMapper.CIS.ofInsert(row) );
+        tx.executeUpdate( SQLMapper.DartCIS.ofINSERT(row) );
     }
     
     private void beginTran() {
@@ -170,9 +169,9 @@ class DataDump {
             RowKRX row = RowKRX();
             row.baseYMD = Str.toYMD(baseYmd);
             row.corpCd = corpCd;
-            row.mktId = krxPriceData[corpCd].mktId;
+            row.mktID = krxPriceData[corpCd].mktId;
             row.corpNm = krxPriceData[corpCd].name;
-            row.marketCap = krxPriceData[corpCd].marketCap;
+            row.cap = krxPriceData[corpCd].marketCap;
             row.shares = krxPriceData[corpCd].listShared;
             row.close = krxPriceData[corpCd].closePrice;
             // insertKrxTable(row);
@@ -223,7 +222,7 @@ class DataDump {
             RowDartCIS row = RowDartCIS.by(
                 baseYear.to!string,
                 EnumTo.period(period),
-                EnumTo.reportType(type),
+                type,
                 corpCd,
                 csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFITLOSS)),
                 csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_BEFORE_TAX)),

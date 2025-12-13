@@ -1,6 +1,5 @@
-module spider.database.model.row_log;
+module spider.database.model.log;
 
-import std.string: format;
 import std.datetime: SysTime;
 
 import spider.common.util.str: Str;

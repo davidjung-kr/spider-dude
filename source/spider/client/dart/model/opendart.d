@@ -1,7 +1,6 @@
 module spider.client.dart.model.opendart;
 
-import spider.client.dart.enums.report_file_type: ReportFileType;
-import spider.client.dart.enums.period: Period;
+import spider.client.dart.enums.report: ReportFileType, Period;
 
 struct DownloadResult {
     public string ymd;

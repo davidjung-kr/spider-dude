@@ -2,7 +2,7 @@ module spider.client.dart.model.cis;
 
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
-import spider.client.dart.enums.period;
+import spider.client.dart.enums.report: Period;
 import spider.client.dart.enums.account;
 import spider.client.dart.model.cis_item;
 

@@ -25,7 +25,7 @@ class TableKRX : SQLite3TableObject {
 
     void insert(RowKRX row) {
         Statement tx = this.con.createStatement();
-        tx.executeUpdate(SQLMapper.KRX.ofInsert(row));
+        tx.executeUpdate(SQLMapper.KRX.ofINSERT(row));
     }
 }
 

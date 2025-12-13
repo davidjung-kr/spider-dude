@@ -25,6 +25,6 @@ class TableCIS : SQLite3TableObject {
 
     void insert(RowDartCIS row) {
         Statement tx = this.con.createStatement();
-        tx.executeUpdate(SQLMapper.CIS.ofInsert(row));
+        tx.executeUpdate(SQLMapper.DartCIS.ofINSERT(row));
     }
 }

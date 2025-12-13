@@ -2,7 +2,7 @@ module spider.database.sql.log;
 
 import std.string: format;
 
-import spider.database.model.row_log: RowLog;
+import spider.database.model.log: RowLog;
 
 enum SQL_TB_LOG {
     /// 생성문

@@ -2,9 +2,7 @@ module spider.client.dart.enums.to;
 
 import std.conv: to;
 import spider.client.dart.consts;
-import spider.client.dart.enums.period;
-import spider.client.dart.enums.report_type;
-import spider.client.dart.enums.report_file_type;
+import spider.client.dart.enums.report;
 import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
 

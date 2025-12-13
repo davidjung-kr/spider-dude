@@ -12,10 +12,9 @@ import spider.formula.formula;
 import spider.formula.result;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
-import spider.client.dart.enums.period;
 import spider.client.dart.enums.account;
 import spider.client.dart.enums.statement;
-import spider.client.dart.enums.report_type;
+import spider.client.dart.enums.report;
 
 class NetNetStocks {
 	this(Period period, ReportType reportType) {

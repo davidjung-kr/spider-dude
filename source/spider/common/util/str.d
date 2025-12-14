@@ -1,8 +1,9 @@
 module spider.common.util.str;
 
 import std.conv: to;
+import std.regex: matchFirst, ctRegex;
 import std.array: replace;
-import std.string: strip, format;
+import std.string: strip, format, indexOf;
 import std.datetime: SysTime, Date;
 import std.algorithm: filter;
 
@@ -86,6 +87,32 @@ struct Str {
 	public static string toYMD(T)(T dt) {
 		return format("%04d%02d%02d", dt.year(), dt.month(), dt.day());
 	}
+
+	
+
+    /**
+     * 항목코드 정규화
+     * 
+     * entity00128661_udf_IS_2021111016569448 .. 와 같이
+     * 공식적인 IFRS 항목코드가 아닌 항목명에서 불필요한 데이터를 지우고
+     * `udf-`를 붙여 리턴한다.
+     * 클랜징할 대상이 없을 경우 입력 값 그대로 리턴.
+     *
+     * Examples: 
+     *	assert("udf-IncomeStatementAbstract" ==
+     *         Parser.cleaningDartAccountingCode(
+     *	"entity00128661_udf_IS_2021111016569448_IncomeStatementAbstract"));
+     * 
+     */
+    private static string cleaningDartAccountingCode(string blaha) {
+        if(blaha.indexOf("entity") < 0) {
+            return blaha;
+        }
+        auto matchResult = matchFirst(blaha, ctRegex!(`entity\d+_udf_[BIS]+_\d+_(\w+)`));
+        if(matchResult.empty)
+            return blaha;
+        return "udf-"~matchResult[1]; // 0은 Full-match, 1부터 group
+    }
 }
 
 unittest {

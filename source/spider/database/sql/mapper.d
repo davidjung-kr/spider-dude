@@ -6,11 +6,10 @@ import std.datetime: Date;
 import spider.common.util.str: Str;
 import spider.database.model.log: RowLog;
 import spider.database.model.krx: RowKRX;
-import spider.database.model.dart: RowDartBS, RowDartCIS;
+import spider.database.model.dart: RowDartBS, RowDartSI;
 import spider.database.sql.log: SQL_TB_LOG;
 import spider.database.sql.krx: SQL_TB_KRX;
-import spider.database.sql.bs: SQL_TB_BS;
-import spider.database.sql.cis: SQL_TB_CIS;
+import spider.database.sql.dart: SQL_TB_BS, SQL_TB_SI;
 
 struct SQLMapper {
     struct KRX {
@@ -53,8 +52,8 @@ struct SQLMapper {
         public static string ofINSERT(RowDartBS row) {
             return format(SQL_TB_BS.INSERT,
                 row.baseYear,
-                row.basePeriod,
-                row.reportType,
+                row.rptType,
+                row.period,
                 row.corpCd,
                 row.fAsst,
                 row.fCurAsst,
@@ -66,12 +65,14 @@ struct SQLMapper {
         }
     }
     
-    struct DartCIS {
-        public static string ofINSERT(RowDartCIS row) {
-            return format(SQL_TB_CIS.INSERT,
+    struct DartSI {
+        public static string ofINSERT(RowDartSI row) {
+            return format(SQL_TB_SI.INSERT,
                 row.baseYear,
-                row.basePeriod,
-                row.reportType,
+                row.rptType,
+                row.period,
+                row.sciYN,
+                row.corpCd,
                 row.fPflss,
                 row.fPrftBfTax,
                 row.fPrft2Own, 

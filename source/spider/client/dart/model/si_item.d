@@ -1,9 +1,9 @@
-module spider.client.dart.model.cis_item;
+module spider.client.dart.model.si_item;
 
 import spider.common.util.str;
 
 /// 손익계산서 계정항목
-struct IncomeStatementItem {
+struct ItemSI {
 	/// 통화
 	private string _currency;
 	/// 항목코드

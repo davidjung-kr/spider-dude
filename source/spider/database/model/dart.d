@@ -1,16 +1,15 @@
 module spider.database.model.dart;
 
-
 import std.string: format;
 import std.datetime: SysTime;
 
-import spider.client.dart.enums.report: ReportType;
+import spider.client.dart.enums.report: ReportType, Period;
 import spider.common.util.str: Str;
 
 struct RowDartBS {
     public string baseYear;
-    public string basePeriod;
-    public string reportType;
+    public string rptType;
+    public string period;
     public string corpCd;
 
     /// fullAssets
@@ -26,10 +25,25 @@ struct RowDartBS {
 
     public string dumpYMS;
 
+    /** 
+     * 
+     * Params:
+     *   baseYear = 기준년도
+     *   rptType = 보고서유형
+     *   period = 분기
+     *   corpCd = 종목코드
+     *   fPflss = 
+     *   fPrftBfTax = 
+     *   fPrft2Own = 
+     *   oprtIcmLss = 
+     *   fGrft = 
+     *   dumpYMS = 
+     * Returns: 
+     */
     public static RowDartBS by(
         string baseYear,
-        string basePeriod,
-        ReportType reportType,
+        ReportType rptType,
+        Period period,
         string corpCd,
         long fAsst,
         long fCurAsst,
@@ -40,8 +54,8 @@ struct RowDartBS {
     ) {
         RowDartBS e = RowDartBS();
         e.baseYear = baseYear;
-        e.basePeriod = basePeriod;
-        e.reportType = reportType;
+        e.rptType = rptType;
+        e.period = period;
         e.corpCd = corpCd;
         e.fAsst = fAsst;
         e.fCurAsst = fCurAsst;
@@ -53,12 +67,25 @@ struct RowDartBS {
     }
 }
 
-
-struct RowDartCIS {
+struct RowDartSI {
     public string baseYear;
-    public string basePeriod;
-    public string reportType;
+    public string rptType;
+    public string period;
+    /// 포괄손익계산서 여부
+    private char _sciYN;
     public string corpCd;
+
+    /// Setter 포괄손익계산서 여부
+    @property
+    public void sciYN(bool sciYN) {
+        this._sciYN = sciYN ? '1':'0';
+    }
+
+    /// Getter 포괄손익계산서 여부
+    @property
+    public char sciYN() {
+        return this._sciYN;
+    }
 
     /// FULL_PROFITLOSS
     public long fPflss;
@@ -73,10 +100,27 @@ struct RowDartCIS {
 
     public string dumpYMS;
 
-    public static RowDartCIS by(
+    /** 
+     * 
+     * Params:
+     *   baseYear = 기준년도
+     *   rptType = 보고서유형
+     *   period = 분기
+     *   sciYN = 포괄손익계산서여부
+     *   corpCd = 종목코드
+     *   fPflss = 
+     *   fPrftBfTax = 
+     *   fPrft2Own = 
+     *   oprtIcmLss = 
+     *   fGrft = 
+     *   dumpYMS = 
+     * Returns: RowDartSI
+     */
+    public static RowDartSI by(
         string baseYear,
-        string basePeriod,
-        ReportType reportType,
+        ReportType rptType,
+        Period period,
+        bool sciYN,
         string corpCd,
         long fPflss,
         long fPrftBfTax,
@@ -85,10 +129,11 @@ struct RowDartCIS {
         long fGrft,
         SysTime dumpYMS
     ) {
-        RowDartCIS e = RowDartCIS();
+        RowDartSI e = RowDartSI();
         e.baseYear = baseYear;
-        e.basePeriod = basePeriod;
-        e.reportType = reportType;
+        e.rptType = rptType;
+        e.period = period;
+        e.sciYN = sciYN;
         e.corpCd = corpCd;
         e.fPflss = fPflss;
         e.fPrftBfTax = fPrftBfTax;

@@ -5,15 +5,14 @@ import std.datetime: Date, Clock;
 import std.math: round;
 
 import spider.report;
-import spider.importer.dart_file;
+import spider.client.dart.parser: DartReportFileParser;
 import spider.loader.report_loader;
 import spider.formula.enums;
 import spider.formula.formula;
 import spider.formula.result;
 import spider.client.dart.model.bs;
-import spider.client.dart.model.cis;
+import spider.client.dart.model.si;
 import spider.client.dart.enums.account;
-import spider.client.dart.enums.statement;
 import spider.client.dart.enums.report;
 
 class NetNetStocks {
@@ -21,10 +20,10 @@ class NetNetStocks {
 		Report myReport = new Report();
 		ReportLoader.krxCapAllBlock(Date(2022, 04, 04), myReport);
 
-		DartFileImporter bsOfs2021Y4 = new DartFileImporter("2021", period, reportType, StatementDART.BS);
+		DartReportFileParser bsOfs2021Y4 = new DartReportFileParser("2021", period, reportType, ReportStatement.BS);
 		bsOfs2021Y4.read(myReport);
 
-		DartFileImporter isOfs2021Y4 = new DartFileImporter("2021", period, reportType, StatementDART.CIS);
+		DartReportFileParser isOfs2021Y4 = new DartReportFileParser("2021", period, reportType, ReportStatement.SCI);
 		isOfs2021Y4.read(myReport);
 		
 		// 4. 비정상 종목 필터링
@@ -48,9 +47,9 @@ class NetNetStocks {
 			long cap = cast(long)round(myReport.getMarketCap(ncav.code));
 
 			DartBS bs = myReport.getBalanceStatement(ncav.code);
-			DartCIS cis = myReport.getComprehensiveIncomeStatement(ncav.code);
-			long revenue = cis.q(Account.FULL_REVENUE);
-			long profitloss = cis.q(Account.FULL_PROFITLOSS);
+			DartSI si = myReport.getComprehensiveIncomeStatement(ncav.code);
+			long revenue = si.q(Account.FULL_REVENUE);
+			long profitloss = si.q(Account.FULL_PROFITLOSS);
 
 			//float netProfit = profitloss/revenue;
 			ff.writef("%s\t%s\t%d\t%d\t%d\t%d\t%f\t%f\t%f\n",
@@ -58,8 +57,8 @@ class NetNetStocks {
 				myReport.getCorpName(ncav.code),
 				cap,
 				bs.getCurrentTerm(Account.FULL_CURRENTASSETS),
-				cis.q(Account.FULL_REVENUE),
-				cis.q(Account.FULL_PROFITLOSS),
+				si.q(Account.FULL_REVENUE),
+				si.q(Account.FULL_PROFITLOSS),
 				per.ratio,
 				1/per.ratio,
 				ncav.value

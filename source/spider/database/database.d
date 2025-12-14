@@ -17,22 +17,21 @@ import std.file:exists, remove, isFile;
 
 import spider.report;
 import spider.common.util.str: Str;
-import spider.importer.dart_file;
+import spider.client.dart.parser: DartReportFileParser;
 import spider.loader.report_loader;
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.report;
 import spider.client.dart.enums.account;
-import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
-import spider.client.dart.model.cis;
+import spider.client.dart.model.si;
 import spider.client.krx.datakrx;
 import spider.client.krx.model: OutBlock;
 import spider.database.model.krx;
 import spider.database.model.dart;
 import spider.database.sql.mapper: SQLMapper;
 import spider.database.sql.krx: SQL_TB_KRX;
-import spider.database.sql.bs: SQL_TB_BS;
+import spider.database.sql.dart: SQL_TB_BS;
 
 import ddbc;
 
@@ -64,7 +63,7 @@ class DataDump {
 
     /** 한국거래소 가격테이블 생성 */
     private void createNewKrxTable() {
-        Statement tx = con.createStatement();
+        ddbc.Statement tx = con.createStatement();
         tx.executeUpdate(SQL_TB_KRX.CREATE_TABLE_IF_NOT_EXISTS);
     }
 
@@ -77,7 +76,7 @@ class DataDump {
     /** 포괄손익계산서 테이블 생성 */
     private void createNewComprehensiveIncomeStatementTable() {
         Statement tx = con.createStatement();
-        tx.executeUpdate(`CREATE TABLE cis (
+        tx.executeUpdate(`CREATE TABLE si (
               baseYear CHAR(4) NOT NULL
             , basePeriod CHAR(2) NOT NULL
             , reportType CHAR(3) NOT NULL
@@ -144,13 +143,13 @@ class DataDump {
     }
 
     /** 포괄손익계산서 데이터 추가 */
-    private void insertComprehensiveIncomeStatementTable(RowDartCIS row) {
+    private void insertComprehensiveIncomeStatementTable(RowDartSI row) {
         Statement tx = con.createStatement();
-        tx.executeUpdate( SQLMapper.DartCIS.ofINSERT(row) );
+        tx.executeUpdate( SQLMapper.DartSI.ofINSERT(row) );
     }
     
     private void beginTran() {
-        Statement tx = con.createStatement();
+        ddbc.Statement tx = con.createStatement();
         tx.executeUpdate("BEGIN TRANSACTION");
     }
 
@@ -191,7 +190,7 @@ class DataDump {
     /** 재무제표 데이터 로드 */
     public void loadBalanceStatementData(int baseYear, Period period, ReportType type) {
         Report bs = new Report();
-		DartFileImporter sheet = new DartFileImporter(baseYear.to!string, period, type, StatementDART.BS);
+		DartReportFileParser sheet = new DartReportFileParser(baseYear.to!string, period, type, ReportStatement.BS);
 		sheet.read(bs);
         DartBS[string] bsData = bs.getBalanceStatementAll();
         beginTran();
@@ -212,17 +211,18 @@ class DataDump {
     }
 
     /** 포괄손익계산서 데이터 로드 */
-    public void loadComprehensiveIncomeStatementData(int baseYear, Period period, ReportType type) {
-        Report cis = new Report();
-		DartFileImporter sheet = new DartFileImporter(baseYear.to!string, period, type, StatementDART.CIS);
-		sheet.read(cis);
-        DartCIS[string] csData = cis.getComprehensiveIncomeStatementAll();
+    public void loadComprehensiveIncomeStatementData(int baseYear, Period period, ReportType rptType) {
+        Report si = new Report();
+		DartReportFileParser sheet = new DartReportFileParser(baseYear.to!string, period, rptType, ReportStatement.SCI);
+		sheet.read(si);
+        DartSI[string] csData = si.getComprehensiveIncomeStatementAll();
         beginTran();
         foreach(string corpCd ; csData.keys) {
-            RowDartCIS row = RowDartCIS.by(
+            RowDartSI row = RowDartSI.by(
                 baseYear.to!string,
-                EnumTo.period(period),
-                type,
+                rptType,
+                period,
+                true,
                 corpCd,
                 csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFITLOSS)),
                 csData[corpCd].getCurrentTerm(EnumTo.ifrsCode(Account.FULL_PROFIT_LOSS_BEFORE_TAX)),

@@ -50,7 +50,7 @@ struct DartBS {
 	}
 
 	/// 계정항목들
-	BalanceStatementItem[] items;
+	ItemBS[] items;
 
 	/// 당기 금액 질의
 	long getCurrentTerm(Account code) {

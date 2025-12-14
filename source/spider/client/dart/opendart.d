@@ -1,10 +1,10 @@
 module spider.client.dart.opendart;
 
+import std.conv: to;
 import std.stdio: File;
 import std.file: read, remove;
 import std.array: appender;
 import curl = std.net.curl;
-import std.conv: to;
 import std.regex: regex, matchAll, RegexMatch;
 import std.zip: ZipArchive;
 import std.windows.charset;
@@ -14,8 +14,7 @@ import spider.common.util.mkdir: Mkdir;
 import spider.common.util.korean: CP949;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.report;
-import spider.client.dart.model.opendart: DownloadResult;
-import spider.client.dart.model.report_file_url: DartReportFileUrl;
+import spider.client.dart.model.opendart: ReportFileUrl, ReportFileDownloadResult;
 import spider.client.dart.consts: DART_FILE_URL, DART_FILE_URL_RX;
 import spider.client.dart.header;
 
@@ -31,22 +30,41 @@ class OpenDart {
         ).to!string;
     }
 
-    public static DartReportFileUrl[] getUrls() {
+    public static ReportFileUrl[] getUrls() {
         string html = getHTML();
         auto rsult = matchAll(html, DART_FILE_URL_RX);
         if (rsult.empty) {
-            return new DartReportFileUrl[0];
+            return new ReportFileUrl[0];
         }
 
-        DartReportFileUrl[] x;
+        ReportFileUrl[] x;
         auto arr = appender(x);
         arr.reserve(256);
 
         while(!rsult.empty) {
-            arr.put(DartReportFileUrl.parse(rsult.front[1], rsult.front[3], rsult.front[2], rsult.front[4]));
+            arr.put(ReportFileUrl.parse(rsult.front[1], rsult.front[3], rsult.front[2], rsult.front[4]));
             rsult.popFront();
         }
         return arr.data();
+    }
+
+
+    /** 
+     * 파일 다운로드
+     * Params:
+     *   url = 다트보고서파일URL(ReportFileUrl)
+     */
+    public static ReportFileDownloadResult downloadByUrl(ReportFileUrl urlObj) {
+        Mkdir.dartdata();
+        ReportFileDownloadResult result = ReportFileDownloadResult(
+            urlObj.ymd, urlObj.rptFileType, urlObj.period);
+        result.zipFilePath = Path.DART_DATA_WITH_DOT~"/"~urlObj.getZipFileName();
+        curl.download(
+            urlObj.get(),
+            result.zipFilePath,
+            OpenDartHeader.ofDownloadFnlttZip());
+        result.doneYN = true;
+        return result;
     }
 
     /** 
@@ -56,14 +74,13 @@ class OpenDart {
      *   reportFileType = 보고서파일종류
      *   period = N분기
      */
-    public static DownloadResult download(string ymd, ReportFileType reportFileType, Period period) {
-        DownloadResult result = DownloadResult(ymd, reportFileType, period);
+    public static ReportFileDownloadResult download(string ymd, ReportFileType rptFileType, Period period) {
+        ReportFileDownloadResult result = ReportFileDownloadResult(ymd, rptFileType, period);
         
-        string _reportFileType = EnumTo.reportFileType(reportFileType);
         string _period = EnumTo.period(period);
         Mkdir.dartdata();
-        foreach(DartReportFileUrl url ; getUrls()) {
-            if (url.ymd==ymd && url.reportFileType==_reportFileType && url.period==_period) {
+        foreach(ReportFileUrl url ; getUrls()) {
+            if (url.ymd==ymd && url.rptFileType==to!string(rptFileType) && url.period==_period) {
                 result.zipFilePath = Path.DART_DATA_WITH_DOT~"/"~url.getZipFileName();
                 curl.download(
                     url.get(),
@@ -77,7 +94,7 @@ class OpenDart {
         return result;
     }
 
-    public static void unzip(DownloadResult input, bool rmZipFile=false) {
+    public static void unzip(ReportFileDownloadResult input, bool rmZipFile=false) {
         auto zip = new ZipArchive(read(input.zipFilePath));
         foreach (name, meber; zip.directory) {
             //writefln("%10s  %08x  %s", meber.expandedSize, meber.crc32, name);

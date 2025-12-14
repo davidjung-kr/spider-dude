@@ -3,7 +3,7 @@ module spider.client.dart.model.bs_item;
 import spider.common.util.str;
 
 /// 재무제표 계정항목
-struct BalanceStatementItem {
+struct ItemBS {
 	/// 통화
 	private string _currency;
 	/// 항목코드
@@ -61,8 +61,12 @@ struct BalanceStatementItem {
 		this._currency = currency;
 		this._itemCode = itemCode;
 		this._itemName = itemName;
-		this._currentTerm     = Str.amountStringToLong(currentTerm);
-		this._endOfTheFirstPeriod    = Str.amountStringToLong(eofp);
+		this._currentTerm = Str.amountStringToLong(currentTerm);
+		this._endOfTheFirstPeriod = Str.amountStringToLong(eofp);
 		this._endOfThePreviousPeriod = Str.amountStringToLong(eopp);
+	}
+
+	public static ItemBS makeEmpty() {
+		return ItemBS("", "", "", "0","0","0");
 	}
 }

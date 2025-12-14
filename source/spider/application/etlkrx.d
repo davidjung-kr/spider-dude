@@ -1,7 +1,8 @@
-module spider.application.etl;
+module spider.application.etlkrx;
 
 import core.time: dur;
 import core.thread.osthread: Thread;
+import std.stdio: writef;
 import std.datetime: Date, DateTime;
 import std.parallelism: parallel;
 
@@ -16,6 +17,7 @@ import spider.client.krx.model;
 class ETLKRXApplication : ETLApplicateObject {
     private ETLKRXApplicationContext context;
     this(ETLKRXApplicationContext context) {
+        super("ETLKRXApplication");
         this.context = context;
     }
 
@@ -24,40 +26,45 @@ class ETLKRXApplication : ETLApplicateObject {
             this.context.getInquiryStartDate(),
             this.context.getInquiryEndDate(),
         );
-        import std.stdio;
-
         this.context.getTable().setAutoCommit(false);
         scope(exit) {
-            this.context.getTable().commit();
             this.context.getTable().setAutoCommit(true);
         }
-        writeln(bizDTs);
         foreach(Date bizDt; bizDTs) {
             if (this.context.getTable().selectExistBy(bizDt)) {
                 continue;
             }
-            KrxBldAttendantResponse res = DataKrx.getBldAttendant(bizDt);
-            Thread.sleep(dur!("msecs")(this.context.getSleepMsecs()) );
-            writef("[%s] End! | CNT:[%d]\n", bizDt.toISOString(), res.blocks.length);
-
+            KrxBldAttendantResponse res = this.clientReq(bizDt);
             string dumpYMS = res.getStrOfCurDT();
-            foreach(OutBlock block; res.blocks) {
-                RowKRX row = RowKRX.by(
-                    Str.toYMD(bizDt),
-                    block.mktId,
-                    block.isuSrtCd,
-                    block.name,
-                    block.marketCap(),
-                    block.listShared(),
-                    block.openPrice(),
-                    block.highPrice(),
-                    block.lowPrice(),
-                    block.closePrice(),
-                    dumpYMS
-                );
-                this.context.getTable().insert(row);
+            foreach(OutBlock block; parallel(res.blocks)) {
+                this.tbInsert(block, Str.toYMD(bizDt), dumpYMS);
             }
+            this.context.getTable().commit();
         }
+    }
+
+    private KrxBldAttendantResponse clientReq(Date bizDt) {
+        KrxBldAttendantResponse res = DataKrx.getBldAttendant(bizDt);
+        Thread.sleep(dur!("msecs")(this.context.getSleepMsecs()));
+        writef("\tclientReq | bizDt:[%s], cnt:[%d]\n", bizDt.toISOString(), res.blocks.length);
+        return res;
+    }
+
+    private void tbInsert(OutBlock block, string strBizDt, string dumpYMS) {
+        RowKRX row = RowKRX.by(
+            strBizDt,
+            block.mktId,
+            block.isuSrtCd,
+            block.name,
+            block.marketCap(),
+            block.listShared(),
+            block.openPrice(),
+            block.highPrice(),
+            block.lowPrice(),
+            block.closePrice(),
+            dumpYMS
+        );
+        this.context.getTable().insert(row);
     }
 }
 

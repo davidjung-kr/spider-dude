@@ -1,16 +1,13 @@
-module spider.client.dart.model.cis;
+module spider.client.dart.model.si;
 
 import spider.client.dart.consts;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.report: Period;
 import spider.client.dart.enums.account;
-import spider.client.dart.model.cis_item;
-
-/// 손익계산서
-alias DartIS = DartCIS;
+import spider.client.dart.model.si_item;
 
 /// 포괄손익계산서
-struct DartCIS {
+struct DartSI {
 	// 분기
 	private Period _period;
 
@@ -62,7 +59,7 @@ struct DartCIS {
 	}
 
 	/// 계정항목들
-	IncomeStatementItem[] items;
+	ItemSI[] items;
 
 	/// 당기 금액 질의
 	long getCurrentTerm(string code) {

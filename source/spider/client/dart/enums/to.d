@@ -4,20 +4,8 @@ import std.conv: to;
 import spider.client.dart.consts;
 import spider.client.dart.enums.report;
 import spider.client.dart.enums.account;
-import spider.client.dart.enums.statement;
 
 struct EnumTo {
-    public static string statementType(StatementDART e) @safe {
-        switch(e) {
-        case StatementDART.BS: return "BS";
-        case StatementDART.IS: return "IS";
-        case StatementDART.CIS: return "CIS";
-        case StatementDART.CF: return "CF";
-        case StatementDART.SCE: return "SCE";
-        default: throw new Exception("Wrong code - ["~e.to!string~"]");
-        }
-    }
-
 	public static string reportType(ReportType e) @safe {
         switch(e) {
         case ReportType.OFS: return "OFS"; // 개별 보고서

@@ -12,7 +12,6 @@ enum SQLite3Table {
     BS_FILE_NAME = "bs.sqlite",
     BS_FILE_FULL_PATH = FILE_PATH~"/"~BS_FILE_NAME,
 
-    CIS_FILE_NAME = "cis.sqlite",
+    CIS_FILE_NAME = "si.sqlite",
     CIS_FILE_FULL_PATH = FILE_PATH~"/"~CIS_FILE_NAME
-
 }

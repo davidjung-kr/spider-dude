@@ -12,10 +12,10 @@ module spider.report;
 import std.algorithm: countUntil;
 
 import spider.client.dart.consts;
-import spider.client.dart.enums.statement;
+import spider.client.dart.enums.report;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.bs_item;
-import spider.client.dart.model.cis;
+import spider.client.dart.model.si;
 import spider.client.krx.model: OutBlock;
 import spider.loader.report_loader;
 
@@ -29,18 +29,18 @@ class Report {
 	@property void balance(DartBS[string] bs) { this._balance = bs; }
     
     /// 포괄손익계산서
-    private DartCIS[string] _cIncome;
+    private DartSI[string] _cIncome;
     /// 포괄손익계산서(Getter)
-	@property DartCIS[string] comprehensiveIncome() { return _cIncome; }
+	@property DartSI[string] comprehensiveIncome() { return _cIncome; }
 	/// 포괄손익계산서(Setter)
-	@property void comprehensiveIncome(DartCIS[string] cis) { this._cIncome = cis; }
+	@property void comprehensiveIncome(DartSI[string] cis) { this._cIncome = cis; }
 
     /// 손익계산서
-    private DartIS[string] _income;
+    private DartSI[string] _income;
     /// 손익계산서(Getter)
-	@property DartIS[string] income() { return _income; }
+	@property DartSI[string] income() { return _income; }
 	/// 손익계산서(Setter)
-	@property void income(DartIS[string] income) { this._income = income; }
+	@property void income(DartSI[string] income) { this._income = income; }
 
     /// 종목코드
     private string[] corpCodes;
@@ -50,12 +50,12 @@ class Report {
 
     /// 포괄손익계산서 여부
     public bool isComprehensive() {
-        ulong cisLength = _cIncome.length;
+        ulong siLength = _cIncome.length;
         ulong isLength = _income.length;
-        if(cisLength <= 0 && isLength <= 0) {
+        if(siLength <= 0 && isLength <= 0) {
             throw new Exception("Please load a income or comprehensive income statement first.");
         }
-        return cisLength > 0;
+        return siLength > 0;
     }
 
     /**
@@ -178,11 +178,11 @@ class Report {
         string[] bsCorpCodes = _balance.keys;
 
         // 포괄을 쓸 껀 지 손익계산서 쓸건 지 결정
-        StatementDART type = _cIncome.length > 0 ? StatementDART.CIS:StatementDART.IS;
-        string[] isCorpCodes =  type == StatementDART.CIS ? _cIncome.keys : _income.keys;
+        ReportStatement type = _cIncome.length > 0 ? ReportStatement.SCI:ReportStatement.CSI;
+        string[] isCorpCodes =  type == ReportStatement.SCI ? _cIncome.keys : _income.keys;
 
         DartBS[string] tempBs;
-        DartCIS[string] tempIs;
+        DartSI[string] tempIs;
         OutBlock[string] tempBlocks;
         uint count = 0;
         foreach(string code; krxCorpCodes) {
@@ -190,7 +190,7 @@ class Report {
                 continue;
 
             tempBs[code] = _balance[code];
-            if(type == StatementDART.CIS) {
+            if(type == ReportStatement.SCI) {
                 tempIs[code] = _cIncome[code];
             }
             else {
@@ -200,7 +200,7 @@ class Report {
             count++;
         }
         
-        if(type == StatementDART.CIS) {
+        if(type == ReportStatement.SCI) {
             _cIncome = tempIs;
         }
         else {
@@ -237,12 +237,12 @@ class Report {
     }
 
     /// 포괄손익계산서 전부 취득
-    public DartCIS[string] getComprehensiveIncomeStatementAll() {
+    public DartSI[string] getComprehensiveIncomeStatementAll() {
         return _cIncome;
     }
 
     /// 종목코드로 포괄손익계산서 취득
-    public DartCIS getComprehensiveIncomeStatement(string code) {
+    public DartSI getComprehensiveIncomeStatement(string code) {
         return _cIncome[code];
     }
 
@@ -254,7 +254,7 @@ class Report {
     }
 
     /// 손익계산서
-    public DartIS getIncomeStatement(string code) {
+    public DartSI getIncomeStatement(string code) {
         return _income[code];
     }
 

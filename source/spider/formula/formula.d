@@ -17,7 +17,7 @@ import spider.formula.result;
 import spider.client.dart.consts;
 import spider.client.dart.enums.account;
 import spider.client.dart.model.bs;
-import spider.client.dart.model.cis;
+import spider.client.dart.model.si;
 
 /**
  * 공식 클래스
@@ -190,7 +190,7 @@ class Formula {
      *  code = 종목코드
      */
     private float calcPer(string code) {
-        DartCIS cIncome = report.getComprehensiveIncomeStatement(code);
+        DartSI cIncome = report.getComprehensiveIncomeStatement(code);
         if(cIncome.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
@@ -215,7 +215,7 @@ class Formula {
      */
     private float calcEvEbita(string code) {
         DartBS balance = report.getBalanceStatement(code);
-        DartIS income = report.getIncomeStatement(code);
+        DartSI income = report.getIncomeStatement(code);
         if(balance.isItemsEmpty() || income.isItemsEmpty())
             return -1;
         ulong marketCap = report.getMarketCap(code);
@@ -249,10 +249,10 @@ class Formula {
         double fullGrossProfit = 0;
 
         if(report.isComprehensive()) {
-            DartCIS income = report.getComprehensiveIncomeStatement(code);
+            DartSI income = report.getComprehensiveIncomeStatement(code);
             fullGrossProfit = income.q(Account.FULL_GROSSPROFIT).to!double;
         } else {
-            DartIS income = report.getIncomeStatement(code);
+            DartSI income = report.getIncomeStatement(code);
             fullGrossProfit = income.q(Account.FULL_GROSSPROFIT).to!double;
         }
         

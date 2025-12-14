@@ -5,16 +5,15 @@ import std.datetime: Date, Clock;
 import std.math: round;
 
 import spider.report;
-import spider.importer.dart_file;
+import spider.client.dart.parser: DartReportFileParser;
 import spider.loader.report_loader;
 import spider.formula.enums;
 import spider.formula.formula;
 import spider.formula.result;
 import spider.client.dart.model.bs;
-import spider.client.dart.model.cis;
+import spider.client.dart.model.si;
 import spider.client.dart.enums.to;
 import spider.client.dart.enums.account;
-import spider.client.dart.enums.statement;
 import spider.client.dart.enums.report;
 
 class LowPerStocks {
@@ -34,8 +33,8 @@ class LowPerStocks {
 		loader.readKrxCapAllByBlock(Date(2021, 04, 02), reports["2021"]);
 
 		foreach(year; reports.keys) {
-			Parser forBalance = new Parser(year, Period.Y4, reportType, StatementDART.BS);
-			Parser forIncome = new Parser(year, Period.Y4, reportType, StatementDART.CIS);
+			Parser forBalance = new Parser(year, Period.Y4, reportType, ReportStatement.BS);
+			Parser forIncome = new Parser(year, Period.Y4, reportType, ReportStatement.SCI);
 			forBalance.read(reports[year]);
 			forIncome.read(reports[year]);
 

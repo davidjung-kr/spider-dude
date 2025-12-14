@@ -43,8 +43,7 @@ struct Str {
 	public static string toKrxCurDtToISOString(string currentDatetime) {
 		//2025.11.23 AM 02:45:15
 		//20180101T123010
-
-		ubyte gap = "AM"==currentDatetime[11..13] ? 0:12;
+		//ubyte gap = "AM"==currentDatetime[11..13] ? 0:12;
 		string hours = "%02d".format(to!int(currentDatetime[14..16]));
 
 		char[] result = new char[15];
@@ -84,7 +83,7 @@ struct Str {
 		return cast(string)af;
 	}
 
-	public static string toYMD(Date dt) {
+	public static string toYMD(T)(T dt) {
 		return format("%04d%02d%02d", dt.year(), dt.month(), dt.day());
 	}
 }

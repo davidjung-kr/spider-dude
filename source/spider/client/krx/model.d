@@ -1,8 +1,28 @@
-module spider.client.krx.model.outblock;
+module spider.client.krx.model;
 
-import spider.common.util.str;
+import std.datetime: DateTime;
 
-import asdf: serdeKeys;
+import spider.common.util.str: Str;
+
+import asdf: serdeKeys, Asdf;
+
+/// 전종목시세 요청결과
+struct KrxBldAttendantResponse {
+    /// 조회날짜
+    @serdeKeys("CURRENT_DATETIME") string currentDatetime;
+    /// 종목별 거래정보
+    @serdeKeys("OutBlock_1") OutBlock[] blocks;
+
+    /// 조회날짜 취득 By DateTime
+    public DateTime getCurDT() {
+        return DateTime.fromISOString(Str.toKrxCurDtToISOString(currentDatetime));
+    }
+
+    /// 조회날짜 취득 By String
+    public string getStrOfCurDT() {
+        return Str.toKrxCurDtToISOString(currentDatetime);
+    }
+}
 
 struct OutBlock {
     /// 거래대금 [Numberic String]

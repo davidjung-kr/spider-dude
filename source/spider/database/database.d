@@ -27,7 +27,7 @@ import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.cis;
 import spider.client.krx.datakrx;
-import spider.client.krx.model.outblock;
+import spider.client.krx.model: OutBlock;
 import spider.database.model.krx;
 import spider.database.model.dart;
 import spider.database.sql.mapper: SQLMapper;

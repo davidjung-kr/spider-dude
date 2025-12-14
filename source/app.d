@@ -9,16 +9,29 @@ module app;
  * License: GPL-3.0
  */
 
-// import std.stdio;
-// import com.davidjung.spider.database;
-// import com.davidjung.spider.types;
-// import com.davidjung.spider.scaffold;
+import std.datetime: SysTime, Date, Clock;
+
+import spider.database.table.krx: TableKRX;
+import spider.application.etl: ETLKRXApplication, ETLKRXApplicationContext;
+import spider.application.parent: IApplication;
 
 void main() {
-        // DataDump db = new DataDump("data.sqlite");
-        // db.loadKrxData(LastBusinessDay.Y2022);        
-        // db.loadBalanceStatementData(2022, Period.Q4, ReportType.CFS);
-        // db.loadBalanceStatementData(2022, Period.Q4, ReportType.OFS);
-        // db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.CFS);
-        // db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.OFS);
+    
+    TableKRX tbKRX = new TableKRX();
+    scope(exit) tbKRX.close();
+    tbKRX.createIfNotExists();
+    tbKRX.createIndexes();
+
+    // SysTime taskYMS = Clock.currTime();
+    // Date taskYMD = Date(taskYMS.year, taskYMS.month, taskYMS.day);
+    IApplication[] appQueue = [
+        new ETLKRXApplication(new ETLKRXApplicationContext(tbKRX, Date(2025, 11, 01), Date(2025, 12, 10), 3000)),
+    ];
+    
+    // while(true) {
+    //     foreach(IApplication app; appQueue) {
+    //         app.tick();
+    //     }
+    // }
+    appQueue[0].tick();
 }

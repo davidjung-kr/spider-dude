@@ -38,6 +38,14 @@ class SQLite3TableObject {
         Statement tx = con.createStatement();
         tx.executeUpdate("END TRANSACTION");
     }
+
+    public void setAutoCommit(bool yn) {
+        this.con.setAutoCommit(yn);
+    }
+
+    public void commit() {
+        this.con.commit();
+    }
     
     public void close() {
         this.con.close();

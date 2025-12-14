@@ -1,5 +1,8 @@
 module spider.database.table.krx;
 
+import std.conv: to;
+import std.datetime: Date;
+
 import spider.database.enums.sqlite3: SQLite3Table;
 import spider.database.table.object: SQLite3TableObject;
 import spider.database.sql.mapper: SQLMapper;
@@ -13,19 +16,32 @@ class TableKRX : SQLite3TableObject {
         super(SQLite3Table.KRX_FILE_FULL_PATH);
     }
 
-    void createIfNotExists() {
+    public void createIfNotExists() {
         Statement tx = this.con.createStatement();
+        scope(exit) tx.close();
         tx.executeUpdate(SQL_TB_KRX.CREATE_TABLE_IF_NOT_EXISTS);
     }
 
-    void createIndexes() {
+    public void createIndexes() {
         Statement tx = this.con.createStatement();
+        scope(exit) tx.close();
         tx.executeUpdate(SQL_TB_KRX.CREATE_INDEX_PK);
     }
 
-    void insert(RowKRX row) {
+    public void insert(RowKRX row) {
         Statement tx = this.con.createStatement();
+        scope(exit) tx.close();
         tx.executeUpdate(SQLMapper.KRX.ofINSERT(row));
+    }
+
+    public bool selectExistBy(Date baseYMD) {
+        Statement tx = this.con.createStatement();
+        scope(exit) tx.close();
+        auto rs = tx.executeQuery(SQLMapper.KRX.ofSELECT_EXIST_BY_BASEYMD(baseYMD));
+        while (rs.next()) {
+            return rs.getBoolean(1) == 0 ? false:true;
+        }
+        return false;
     }
 }
 

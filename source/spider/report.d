@@ -16,7 +16,7 @@ import spider.client.dart.enums.statement;
 import spider.client.dart.model.bs;
 import spider.client.dart.model.bs_item;
 import spider.client.dart.model.cis;
-import spider.client.krx.model.outblock;
+import spider.client.krx.model: OutBlock;
 import spider.loader.report_loader;
 
 /// 보고서 (재무상태표, 손익계산서, 포괄손익계산서 포함)
@@ -300,3 +300,12 @@ class Report {
         return this.corpCodes;
     }
 }
+
+/*unittest {
+    // DataDump db = new DataDump("data.sqlite");
+    // db.loadKrxData(LastBusinessDay.Y2022);        
+    // db.loadBalanceStatementData(2022, Period.Q4, ReportType.CFS);
+    // db.loadBalanceStatementData(2022, Period.Q4, ReportType.OFS);
+    // db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.CFS);
+    // db.loadComprehensiveIncomeStatementData(2022, Period.Q4, ReportType.OFS);
+}*/

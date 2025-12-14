@@ -1,12 +1,14 @@
 module spider.database.sql.mapper;
 
 import std.string: format;
+import std.datetime: Date;
 
+import spider.common.util.str: Str;
 import spider.database.model.log: RowLog;
-import spider.database.sql.log: SQL_TB_LOG;
 import spider.database.model.krx: RowKRX;
-import spider.database.sql.krx: SQL_TB_KRX;
 import spider.database.model.dart: RowDartBS, RowDartCIS;
+import spider.database.sql.log: SQL_TB_LOG;
+import spider.database.sql.krx: SQL_TB_KRX;
 import spider.database.sql.bs: SQL_TB_BS;
 import spider.database.sql.cis: SQL_TB_CIS;
 
@@ -25,6 +27,12 @@ struct SQLMapper {
                 row.low,
                 row.close,
                 row.dumpYMS
+            );
+        }
+
+        public static string ofSELECT_EXIST_BY_BASEYMD(Date baseYMD) {
+            return format(SQL_TB_KRX.SELECT_EXIST_BY_BASEYMD,
+                Str.toYMD(baseYMD)
             );
         }
     }

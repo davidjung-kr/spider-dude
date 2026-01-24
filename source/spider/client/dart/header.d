@@ -6,7 +6,7 @@ import spider.common.enums.header: UserAgent;
 
 struct OpenDartHeader {
     /**See_Also: https://opendart.fss.or.kr/disclosureinfo/fnltt/dwld/main.do */
-    public static cURL.HTTP ofFnlttDwldMain(UserAgent ua = UserAgent.W64_10_MS_EDGE) {
+    public static cURL.HTTP ofFnlttDwldMain(UserAgent ua = UserAgent.W64_10_MS_EDGE_144) {
         cURL.HTTP h = cURL.HTTP();
         h.addRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         h.addRequestHeader("Accept", "text/html, */*; q=0.01");
@@ -21,7 +21,7 @@ struct OpenDartHeader {
         return h;
     }
 
-    public static cURL.HTTP ofDownloadFnlttZip(UserAgent ua = UserAgent.W64_10_MS_EDGE) {
+    public static cURL.HTTP ofDownloadFnlttZip(UserAgent ua = UserAgent.W64_10_MS_EDGE_144) {
         cURL.HTTP h = cURL.HTTP();
         h.addRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         h.addRequestHeader("Accept-Language", "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3");

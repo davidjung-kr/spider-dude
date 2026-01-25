@@ -88,3 +88,43 @@ struct OutBlock {
         return Str.numbericToUlong(this.listShrs);
     }
 }
+
+struct KindCorpListRequest {
+    private string method = "searchCorpList";
+    private string comAbbrv = "";
+    private string beginIndex = "";
+    private string orderStat= "D";
+    private string isurCd = "";
+    private string repIsuSrtCd = "";
+    private string searchCodeType = "";
+    private string industry = "";
+    private string comAbbrvTmp = "";
+    public int pageIndex = 1;
+    public int currentPageSize = 15;
+    public string orderMode = 3;
+    public string marketType= "stockMkt";
+    public int searchType = 13;
+    public string fiscalYearEnd = "all";
+    public string location = "all";
+
+    public static toStr() {
+        return format(`method=%s&pageIndex=%d&currentPageSize=%d&comAbbrv=%s&beginIndex=%s&orderMode=%d&orderStat=%s&isurCd=%s&repIsuSrtCd=%s&searchCodeType=%s&marketType=%s&searchType=%d&industry=%s&fiscalYearEnd=%s&comAbbrvTmp=%s&location=%s`, // @suppress(dscanner.style.long_line)
+            method,
+            pageIndex,
+            currentPageSize,
+            comAbbrv,
+            beginIndex,
+            orderMode,
+            orderStat,
+            isurCd,
+            repIsuSrtCd,
+            searchCodeType,
+            marketType,
+            searchType,
+            industry,
+            fiscalYearEnd,
+            comAbbrvTmp,
+            location
+        );
+    }
+}
